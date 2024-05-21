@@ -1,5 +1,5 @@
 # 将静态内容部署到 GitHub Pages 的工作流
-name: 静态内容部署到 GitHub Pages 的工作流
+name: 博客部署
 
 on:
   # 在推送到 dev 分支时运行
@@ -59,4 +59,4 @@ jobs:
 
       # 将整个仓库作为工件上传
       - name: 将整个仓库作为工件上传
-        uses: actions/upload-pages-artifact@v
+        uses: actions/upload-pages-artifact@v4
