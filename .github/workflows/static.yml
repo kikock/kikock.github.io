@@ -37,8 +37,6 @@ jobs:
       # 合并 dev 分支到 master 分支
       - name: 合并 dev 分支到 master 分支
         run: |
-          git config --global user.name kikock
-          git config --global user.email kikock1987@gmail.com
           git checkout master
           git merge dev
           git push origin master
