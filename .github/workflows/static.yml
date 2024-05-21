@@ -44,8 +44,11 @@ jobs:
       # 合并 dev 分支到 master 分支
       - name: 合并 dev 分支到 master 分支
         run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git checkout master
           git merge dev
+          git push origin master
       # 使用 PAT 推送更改
       - name: 推送更改到 master
         env:
@@ -54,7 +57,7 @@ jobs:
           git push https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }} master
 
       # 设置 GitHub Pages 配置
-      - name: Setup Pages
+      - name: 设置 GitHub Pages 配置
         uses: actions/configure-pages@v5
 
       # 将整个仓库作为工件上传
