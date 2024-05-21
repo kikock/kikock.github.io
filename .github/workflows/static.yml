@@ -34,13 +34,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: dev  # 检出 dev 分支
-
-      # 设置 Git 用户信息
-      - name: 设置 Git 用户信息
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
       # 合并 dev 分支到 master 分支
       - name: 合并 dev 分支到 master 分支
         run: |
