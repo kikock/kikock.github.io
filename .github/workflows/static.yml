@@ -1,5 +1,5 @@
 # 将静态内容部署到 GitHub Pages 的工作流
-name: Deploy static content to Pages
+name: 静态内容部署到 GitHub Pages 的工作流
 
 on:
   # 在推送到 dev 分支时运行
@@ -30,31 +30,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # 检出仓库代码
-      - name: Checkout
+      - name: 检出仓库代码
         uses: actions/checkout@v4
         with:
           ref: dev  # 检出 dev 分支
 
-      # 合并 dev 分支到 master 分支
-      - name: Merge dev to master
+      # 设置 Git 用户信息
+      - name: 设置 Git 用户信息
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      # 合并 dev 分支到 master 分支
+      - name: 合并 dev 分支到 master 分支
+        run: |
           git checkout master
           git merge dev
-          git push origin master
+      # 使用 PAT 推送更改
+      - name: 推送更改到 master
+        env:
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          git push https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }} master
 
       # 设置 GitHub Pages 配置
-      - name: Setup Pages
+      - name: 设置 GitHub Pages 配置
         uses: actions/configure-pages@v5
 
       # 将整个仓库作为工件上传
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: '.'
-
-      # 将上传的工件部署到 GitHub Pages
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: 将整个仓库作为工件上传
+        uses: actions/upload-pages-artifact@v
