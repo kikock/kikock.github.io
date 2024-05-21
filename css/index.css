@@ -10453,12 +10453,7 @@ h1.page-title + .tag-cloud-list {
   align-items: center;
 }
 #footer-bar .footer-bar-links .footer-bar-right {
-  display: -webkit-box;
-  display: -moz-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: box;
-  display: flex;
+  display: none;
   -webkit-box-orient: horizontal;
   -moz-box-orient: horizontal;
   -o-box-orient: horizontal;
