@@ -38,7 +38,7 @@ jobs:
       - name: 合并 dev 分支到 master 分支
         run: |
           git fetch
-          git checkout master
+          git checkout origin/master
           git merge dev
           git push origin master
       # 使用 PAT 推送更改
