@@ -37,6 +37,7 @@ jobs:
       # 合并 dev 分支到 master 分支
       - name: 合并 dev 分支到 master 分支
         run: |
+          git fetch
           git checkout master
           git merge dev
           git push origin master
