@@ -54,9 +54,16 @@ jobs:
           git push https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }} master
 
       # 设置 GitHub Pages 配置
-      - name: 设置 GitHub Pages 配置
+      - name: Setup Pages
         uses: actions/configure-pages@v5
 
       # 将整个仓库作为工件上传
       - name: 将整个仓库作为工件上传
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      # 将上传的工件部署到 GitHub Pages
+      - name: 部署到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
