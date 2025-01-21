@@ -1,0 +1,495 @@
+<!DOCTYPE html><html lang="zh-TW" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>OpenWrt养老旁路由从零开始(基于immortalWrt固件) | 不抽烟的🐇</title><meta name="keywords" content="openwrt"><meta name="author" content="kikock"><meta name="copyright" content="kikock"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="OpenWrt养老旁路由从零开始(基于immortalWrt固件)"><meta name="application-name" content="OpenWrt养老旁路由从零开始(基于immortalWrt固件)"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="OpenWrt养老旁路由从零开始(基于immortalWrt固件)"><meta property="og:url" content="https://home.34462958.xyz/2025/01/16/OpenWrt%E5%85%BB%E8%80%81%E6%97%81%E8%B7%AF%E7%94%B1%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B/index.html"><meta property="og:site_name" content="不抽烟的🐇"><meta property="og:description" content="OpenWrt养老旁路由从零开始(基于immortalWrt固件)准备工作 软路由、或是旁路由、或是其他能做软路由的盒子（N1、树莓派等）  软路由或是旁路由本身具有网络  涉及到的组件 immortalWrt固件 passwall(immortalWrt固件已经安装) AdGuardHome Mo"><meta property="og:locale" content="zh-TW"><meta property="og:image" content="https://api.hanximeng.com/ranimg/api.php?_r_=37c2dbde-1417-9756-3212-dbad4a23f29a"><meta property="article:author" content="kikock"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://api.hanximeng.com/ranimg/api.php?_r_=37c2dbde-1417-9756-3212-dbad4a23f29a"><meta name="description" content="OpenWrt养老旁路由从零开始(基于immortalWrt固件)准备工作 软路由、或是旁路由、或是其他能做软路由的盒子（N1、树莓派等）  软路由或是旁路由本身具有网络  涉及到的组件 immortalWrt固件 passwall(immortalWrt固件已经安装) AdGuardHome Mo"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="https://home.34462958.xyz/2025/01/16/OpenWrt%E5%85%BB%E8%80%81%E6%97%81%E8%B7%AF%E7%94%B1%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: undefined,
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: {"enable":true,"default":"晚上好👋","list":[{"greeting":"晚安😴","startTime":0,"endTime":5},{"greeting":"早上好鸭👋, 祝你一天好心情！","startTime":6,"endTime":9},{"greeting":"上午好👋, 状态很好，鼓励一下～","startTime":10,"endTime":10},{"greeting":"11点多啦, 在坚持一下就吃饭啦～","startTime":11,"endTime":11},{"greeting":"午安👋, 宝贝","startTime":12,"endTime":14},{"greeting":"🌈充实的一天辛苦啦！","startTime":14,"endTime":18},{"greeting":"19点喽, 奖励一顿丰盛的大餐吧🍔。","startTime":19,"endTime":19},{"greeting":"晚上好👋, 在属于自己的时间好好放松😌~","startTime":20,"endTime":24}]},
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: false,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🏠 智能家居小能手","🔨 设计开发一条虫","🏃 脚踏实地行动派","💢 人菜游戏瘾还大"]},
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '複製成功',
+    error: '複製錯誤',
+    noSupport: '瀏覽器不支援'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '剛剛',
+    min: '分鐘前',
+    hour: '小時前',
+    day: '天前',
+    month: '個月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切換為繁體","cht_to_chs":"你已切換為簡體","day_to_night":"你已切換為深色模式","night_to_day":"你已切換為淺色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '不抽烟的🐇',
+  title: 'OpenWrt养老旁路由从零开始(基于immortalWrt固件)',
+  postAI: '',
+  pageFillDescription: 'OpenWrt养老旁路由从零开始(基于immortalWrt固件), 准备工作, 涉及到的组件, 写在前面, 1.使用 iKuai +openwrt 做旁路由网络拓扑, 安装组件, immortalWrt安装, 优点, 与其他分支的区别, 使用方法, PasswallMosDNSAdGuardHome安装, 软路由配置安装和配置, 系统环境：, 处理逻辑, 主要更改配置, 其他问题, 新增 passwall分流配置养老旁路由从零开始基于固件准备工作软路由或是旁路由或是其他能做软路由的盒子树莓派等软路由或是旁路由本身具有网络涉及到的组件固件固件已经安装写在前面使用做旁路由网络拓扑固件固件已经安装安装组件固件下载地址开源项目地址点击进入项目地址点击进入项目地址点击进入项目地址点击进入安装是一个基于的开源路由器固件分支主要面向中国大陆用户它与原版相比具有以下特点优点稳定性高提供了更高的稳定性和可靠性适合长时间稳定运行包管理丰富拥有丰富的软件包管理系统方便用户安装各种附加组件在国内网络环境中也能方便地更新安装软件包对国内用户非常友好硬件支持广泛支持广泛的路由器和其他网络设备包括一些不再受官方支持的设备还能运行在架构设备和树莓派等单板计算机上社区支持活跃拥有活跃的开发者社区不断更新和改进用户可以轻松找到丰富的中文教程论坛讨论和问题解答降低了上手难度界面简洁易用采用管理界面操作简单直观还支持中文语言让小白也能轻松上手功能强大支持各种网络功能包括无线网络支持双频无线网络支持协议有线网络支持千兆有线网络路由功能支持虚拟网络等防火墙支持多种防火墙规则等与其他分支的区别与依旧跟随着的版本迭代但略微慢于官方最新版本它有时会对系统软件包进行一些修改比如合并一些被认为是有优化效果的补丁在界面上添加负载温度之类的信息还会修改默认参数以优化性能此外通常还会先于提供一些后者尚未提供支持的机器的固件与的固件有时会打包进闭源的组件且所基于的分支版本一般比较老而基本上是开源的一些流行的闭源驱动或软件都没有被收录这是与的主要区别使用方法进入项目地址如图下载固件安装略登录进行基本设置无密码直接登录设置密码安装本次使用连接旁路由进行安装使用连接路由器安装默认已经安装可进入项目下载安装包升级安装包翻译包安装包翻译包其他内核依赖根据自己的架构进行下载我的是的软路由安装进入项目下载相关安装包这个需要根据自己的架构进行下载我的是的软路由这个需要根据自己的架构进行下载我的是的软路由如果不知道架构可查看架构下载对应安装依赖包我的是上传文件使用包名称命令安装安装进入项目下载安装包上传文件使用包名称命令安装软路由配置安装和配置系统环境固件核心版本处理逻辑国内外分流缓存防泄漏由包揽所有解析屏蔽网站可跟踪全屋访问的网站上游设置为上游设置为主要更改配置设置后台设置重定向选择用端口替换转发不勾选勾选远程首选自定义国内域名解析优化其他选项随意设置后台设置重定向选择作为的上游服务器网页管理界面监听接口选择所有接口端口服务器监听接口选择所有接口端口上游服务器即配置的默认端口选择负载均衡其他都不选不填拦截模式选空缓存配置全部留空不选因为缓存由负责其他选项随意设置选中过滤代理域名过滤模式选择通过请求远程自定义即设置的服务器端口当使用中国列表外时的默认选择直连高级设置转发端口代理方式的设置设置及端口服务器端口默认值转发转发其他问题默认不支持协议需要手动添加解压包安装相关协议组件即可前置依赖旧节点不支持加密算法可安装和解决新增分流配置进入菜单把主开关打勾点击添加按钮如图修改设置端口和监听端口这个端口号要记住等下要用到然后保存并应用点击配置修改将自动切换打勾恢复切换打勾其他配置根据需要修改在备用节点的列表中根据自己实际情况选择备用节点设置完成点保存应用进入菜单点击节点列表添加一个节点类型为地址写端口写第个步骤设置的监听端口点保存应用在主界面在节点处改成上一个步骤我们自己添加的节点名称点保存应用来测试一下网络全部畅通证明设置有效',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-01-16 10:18:00',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.2.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像2" src="/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">不抽烟的🐇</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新評論</span></div><div class="aside-list"><span>正在載入中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Cloudflare/" style="font-size: 1.05rem;">Cloudflare<sup>2</sup></a><a href="/tags/GitHub/" style="font-size: 1.05rem;">GitHub<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>5</sup></a><a href="/tags/MC/" style="font-size: 1.05rem;">MC<sup>1</sup></a><a href="/tags/docker/" style="font-size: 1.05rem;">docker<sup>4</sup></a><a href="/tags/git/" style="font-size: 1.05rem;">git<sup>1</sup></a><a href="/tags/java/" style="font-size: 1.05rem;">java<sup>4</sup></a><a href="/tags/mysql/" style="font-size: 1.05rem;">mysql<sup>1</sup></a><a href="/tags/nginx/" style="font-size: 1.05rem;">nginx<sup>1</sup></a><a href="/tags/openwrt/" style="font-size: 1.05rem;">openwrt<sup>1</sup></a><a href="/tags/%E7%A7%91%E5%AD%A6%E4%B8%8A%E7%BD%91/" style="font-size: 1.05rem;">科学上网<sup>1</sup></a><a href="/tags/%E7%BA%B8%E9%A3%9E%E6%9C%BA/" style="font-size: 1.05rem;">纸飞机<sup>1</sup></a><a href="/tags/%E7%BE%A4%E6%99%96/" style="font-size: 1.05rem;">群晖<sup>1</sup></a><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 1.05rem;">设计模式<sup>5</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>歸檔</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/10/"><span class="card-archive-list-date">十月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/07/"><span class="card-archive-list-date">七月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">4</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/06/"><span class="card-archive-list-date">六月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">8</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/05/"><span class="card-archive-list-date">五月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">4</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/03/"><span class="card-archive-list-date">三月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2023/04/"><span class="card-archive-list-date">四月 2023</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2023/03/"><span class="card-archive-list-date">三月 2023</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%85%B6%E4%BB%96/" itemprop="url">其他</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/openwrt/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>openwrt</span></a></span></div></div><h1 class="post-title" itemprop="name headline">OpenWrt养老旁路由从零开始(基于immortalWrt固件)</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">發表於</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-01-16T10:18:00.000Z" title="發表於 2025-01-16 10:18:00">2025-01-16</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新於</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-01-16T10:18:00.000Z" title="更新於 2025-01-16 10:18:00">2025-01-16</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-wordcount"><i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" title="文章字数"></i><span class="post-meta-label" title="文章字数">字數總計:</span><span class="word-count" title="文章字数">1.7k</span><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" title="阅读时长"></i><span class="post-meta-label" title="阅读时长">閱讀時長:</span><span>6分鐘</span></span><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="OpenWrt养老旁路由从零开始(基于immortalWrt固件)"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">閱讀量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为绵阳"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>绵阳</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://api.hanximeng.com/ranimg/api.php?_r_=37c2dbde-1417-9756-3212-dbad4a23f29a"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="https://home.34462958.xyz/2025/01/16/OpenWrt%E5%85%BB%E8%80%81%E6%97%81%E8%B7%AF%E7%94%B1%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B/"><header><a class="post-meta-categories" href="/categories/%E5%85%B6%E4%BB%96/" itemprop="url">其他</a><a href="/tags/openwrt/" tabindex="-1" itemprop="url">openwrt</a><h1 id="CrawlerTitle" itemprop="name headline">OpenWrt养老旁路由从零开始(基于immortalWrt固件)</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">kikock</span><time itemprop="dateCreated datePublished" datetime="2025-01-16T10:18:00.000Z" title="發表於 2025-01-16 10:18:00">2025-01-16</time><time itemprop="dateCreated datePublished" datetime="2025-01-16T10:18:00.000Z" title="更新於 2025-01-16 10:18:00">2025-01-16</time></header><h2 id="OpenWrt养老旁路由从零开始-基于immortalWrt固件"><a href="#OpenWrt养老旁路由从零开始-基于immortalWrt固件" class="headerlink" title="OpenWrt养老旁路由从零开始(基于immortalWrt固件)"></a>OpenWrt养老旁路由从零开始(基于immortalWrt固件)</h2><h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><ul>
+<li>软路由、或是旁路由、或是其他能做软路由的盒子（N1、树莓派等） </li>
+<li>软路由或是旁路由本身具有网络</li>
+</ul>
+<h3 id="涉及到的组件"><a href="#涉及到的组件" class="headerlink" title="涉及到的组件"></a>涉及到的组件</h3><ul>
+<li>immortalWrt固件</li>
+<li>passwall(immortalWrt固件已经安装)</li>
+<li>AdGuardHome</li>
+<li>MosDNS</li>
+</ul>
+<h3 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h3><h4 id="1-使用-iKuai-openwrt-做旁路由网络拓扑"><a href="#1-使用-iKuai-openwrt-做旁路由网络拓扑" class="headerlink" title="1.使用 iKuai +openwrt 做旁路由网络拓扑"></a>1.使用 iKuai +openwrt 做旁路由网络拓扑</h4><p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/assets/img/%E7%BD%91%E7%BB%9C%E6%8B%93%E6%89%91%E5%9B%BE.png" alt="网络拓扑图"></p>
+<ul>
+<li>immortalWrt固件</li>
+<li>passwall(immortalWrt固件已经安装)</li>
+<li>AdGuardHome</li>
+<li>MosDNS</li>
+</ul>
+<h3 id="安装组件"><a href="#安装组件" class="headerlink" title="安装组件"></a>安装组件</h3><ol>
+<li>immortalWrt固件下载地址  开源项目地址: <a target="_blank" rel="noopener" href="https://github.com/igeekbb/AutoBuildImmortalWrt">点击进入</a></li>
+<li>passwall  项目地址: <a target="_blank" rel="noopener" href="https://github.com/xiaorouji/openwrt-passwall/releases">点击进入</a></li>
+<li>MosDNS  项目地址: <a target="_blank" rel="noopener" href="https://github.com/sbwml/luci-app-mosdns">点击进入</a></li>
+<li>AdGuardHome  项目地址: <a target="_blank" rel="noopener" href="https://github.com/rufengsuixing/luci-app-adguardhome">点击进入</a></li>
+</ol>
+<h3 id="immortalWrt安装"><a href="#immortalWrt安装" class="headerlink" title="immortalWrt安装"></a>immortalWrt安装</h3><p>ImmortalWrt 是一个基于 OpenWrt 的开源路由器固件分支，主要面向中国大陆用户。它与原版 OpenWrt 相比，具有以下特点：</p>
+<h4 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h4><ul>
+<li><strong>稳定性高</strong>：提供了更高的稳定性和可靠性，适合长时间稳定运行。</li>
+<li><strong>包管理丰富</strong>：拥有丰富的软件包管理系统，方便用户安装各种附加组件。在国内网络环境中也能方便地更新、安装软件包，对国内用户非常友好。</li>
+<li><strong>硬件支持广泛</strong>：支持广泛的路由器和其他网络设备，包括一些不再受官方 OpenWrt 支持的设备，还能运行在 x86 架构设备和树莓派等单板计算机上。</li>
+<li><strong>社区支持活跃</strong>：拥有活跃的开发者社区，不断更新和改进，用户可以轻松找到丰富的中文教程、论坛讨论和问题解答，降低了上手难度。</li>
+<li><strong>界面简洁易用</strong>：采用 Luci Web 管理界面，操作简单直观，还支持中文语言，让小白也能轻松上手。</li>
+<li><strong>功能强大</strong>：支持各种网络功能，包括无线网络（支持 2.4G&#x2F;5G 双频无线网络，支持 802.11ac 协议）、有线网络（支持千兆有线网络）、路由功能（支持 NAT、DHCP、DDNS、虚拟网络等）、防火墙（支持多种防火墙规则）等。</li>
+</ul>
+<h4 id="与其他分支的区别"><a href="#与其他分支的区别" class="headerlink" title="与其他分支的区别"></a>与其他分支的区别</h4><ul>
+<li><strong>与 OpenWrt</strong>：ImmortalWrt 依旧跟随着 OpenWrt 的版本迭代，但略微慢于官方最新版本。它有时会对系统、软件包进行一些修改，比如合并一些被认为是有优化效果的补丁，在界面上添加 cpu 负载、温度之类的信息，还会修改默认参数以优化性能。此外，ImmortalWrt 通常还会先于 OpenWrt 提供一些后者尚未提供支持的机器的固件。</li>
+<li><strong>与 LEDE&#x2F;Lean</strong>：Lean 的固件有时会打包进闭源的组件，且所基于的 OpenWrt 分支版本一般比较老。而 ImmortalWrt 基本上是开源的，一些流行的闭源驱动或软件都没有被 ImmortalWrt 收录，这是 ImmortalWrt 与 Lean 的主要区别。</li>
+</ul>
+<h4 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h4><ol>
+<li>进入项目地址如图:</li>
+</ol>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/assets/img/msedge_20250116102702_208.png" alt="1111"></p>
+<ol start="2">
+<li>下载固件:</li>
+</ol>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/assets/img/%E4%B8%8B%E8%BD%BD%E5%9B%BA%E4%BB%B6.png" alt="下载固件"></p>
+<ol start="3">
+<li><p>安装openwrt(略)</p>
+</li>
+<li><p>登录openwrt进行基本设置</p>
+<p> 无密码直接登录</p>
+</li>
+</ol>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/assets/img/msedge_20250116115347_211.jpg" alt="登录wrt"></p>
+<pre><code>设置密码
+</code></pre>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/assets/img/msedge_20250116115756_212.png" alt="设置密码"></p>
+<h3 id="Passwall-MosDNS-AdGuardHome安装"><a href="#Passwall-MosDNS-AdGuardHome安装" class="headerlink" title="Passwall,MosDNS,AdGuardHome安装"></a>Passwall,MosDNS,AdGuardHome安装</h3><p><strong>本次使用ssh连接旁路由进行安装,使用<code>MobaXterm</code>连接路由器</strong></p>
+<ol>
+<li>Passwall安装<ul>
+<li><p>**默认已经安装,可进入项目下载安装包(升级)**：</p>
+<p>luci-19.07_luci-app-passwall_25.1.15-1_all.ipk (19.07安装包)<br>luci-19.07_luci-i18n-passwall-zh-cn_25.1.15-1_all.ipk (19.07翻译包)<br>luci-23.05_luci-app-passwall_25.1.15_all.ipk (23.05安装包)<br>luci-23.05_luci-i18n-passwall-zh-cn_git-25.015.29479-0eed372_all.ipk (23.05翻译包)<br>其他内核依赖 根据自己的CPU架构进行下载(我的是j1900的软路由 x86_64)<br>passwall_packages_ipk_x86_64.zip</p>
+</li>
+</ul>
+</li>
+</ol>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/assets/img/msedge_20250121094935_239.png" alt="Passwall安装"></p>
+<ol start="2">
+<li>MosDNS安装<ul>
+<li><p><strong>进入MosDns项目,下载MosDNS相关安装包</strong>：</p>
+<pre><code>  luci-app-mosdns_1.5.20_all.ipk
+  luci-i18n-mosdns-zh-cn_git-23.319.54348-e79a991_all.ipk
+  mosdns_5.3.1-1_x86_64 这个需要根据自己的CPU架构进行下载(我的是j1900的软路由 x86_64)
+  v2dat_2022-12-15-47b8ee51-1_x86_64.ipk 这个需要根据自己的CPU架构进行下载(我的是j1900的软路由 x86_64)
+  v2ray-geoip_2024-02-26_all.ipk
+  v2ray-geosite_2024-02-26_all.ipk
+</code></pre>
+</li>
+</ul>
+</li>
+</ol>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/assets/img/msedge_20250116120617_213.png" alt="MosDNS安装"></p>
+<p>   如果不知道CPU架构,可查看CPU架构,下载对应安装依赖包(我的是x86_64)<br>    <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/os-release |grep ARCH</span><br><span class="line"></span><br></pre></td></tr></table></figure><br><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/assets/img/MobaXterm_Personal_22.1_20250116120914_216.png" alt="MosDNS安装"></p>
+<p>   上传文件  使用<code>opkg install &lt;包名称&gt;</code> 命令安装</p>
+<ol start="2">
+<li><p>AdGuardHome安装</p>
+<ul>
+<li><strong>进入AdGuardHome项目,下载AdGuardHome安装包</strong>：</li>
+</ul>
+</li>
+</ol>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/assets/img/msedge_20250116165136_219.png" alt="AdGuardHome安装"></p>
+<p>   上传文件  使用<code>opkg install &lt;包名称&gt;</code> 命令安装</p>
+<h3 id="软路由配置安装和配置"><a href="#软路由配置安装和配置" class="headerlink" title="软路由配置安装和配置"></a>软路由配置安装和配置</h3><p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/assets/img/msedge_20250121095342_240.png" alt="immortalWrt固件安装"></p>
+<h4 id="系统环境："><a href="#系统环境：" class="headerlink" title="系统环境："></a>系统环境：</h4><pre><code> * openwrt immortalWrt固件  ImmortalWrt 24.10.0-rc3 
+ * passwall 24.12.26-r1
+ * AdGuardHome 	核心版本 v0.107.55
+ * MosDNS  5.3.3-3
+</code></pre>
+<h5 id="处理逻辑"><a href="#处理逻辑" class="headerlink" title="处理逻辑"></a>处理逻辑</h5><p>1 ，mosdns 国内外分流、DNS 缓存、防 DNS 泄漏，由 mosdns 包揽 openwrt 所有解析<br>2 ，adguardhome 屏蔽网站，可跟踪全屋访问的网站，上游 dns 设置为 mosdns<br>3 ，passwall  上游 DNS 设置为 adguardhome</p>
+<h5 id="主要更改配置"><a href="#主要更改配置" class="headerlink" title="主要更改配置"></a>主要更改配置</h5><ul>
+<li>Mosdns 设置：</li>
+</ul>
+<ol>
+<li>后台设置：6060 重定向：选择 用 53 端口替换 dnsmasq</li>
+<li>DNS 转发，不勾选</li>
+<li>勾选，远程 DNS 首选 IPv4 、自定义国内 DNS 、Apple 域名解析优化</li>
+<li>其他选项随意</li>
+</ol>
+<ul>
+<li>adguardhome 设置：</li>
+</ul>
+<ol>
+<li>后台设置：6060 重定向：选择 <code>作为dnsmasq的上游服务器</code></li>
+<li>网页管理界面，监听接口：选择 所有接口，端口：3000</li>
+<li>DNS 服务器，监听接口：选择 所有接口，端口：52 </li>
+<li>上游 DNS 服务器 <code>127.0.0.1:5335</code> （即 mosdns配置的默认端口 ）,选择负载均衡 </li>
+<li>其他都不选不填，拦截模式选空 ip </li>
+<li>DNS 缓存配置,全部留空不选（因为 DNS 缓存由 Mosdns 负责）</li>
+<li>其他选项随意</li>
+</ol>
+<ul>
+<li>adguardhome 设置：</li>
+</ul>
+<ol>
+<li>DNS <ol>
+<li>选中 <code>过滤代理域名 IPv6</code></li>
+<li>过滤模式:选择<code>通过 UDP 请求 DNS</code></li>
+<li>远程 DNS:自定义 127.0.0.1:52 (即 adguardhome设置的服务器端口)</li>
+<li>当使用中国列表外时的默认 DNS：选择 <code>直连 DNS</code></li>
+</ol>
+</li>
+<li>高级设置 <ol>
+<li>UDP 转发端口:<code>DNS</code></li>
+<li>TCP 代理方式:<code>Tproxy</code></li>
+</ol>
+</li>
+</ol>
+<ul>
+<li>Openwrt 的 DHCP&#x2F;DNS 设置：</li>
+</ul>
+<ol>
+<li>设置及端口——DNS 服务器端口：<code>53</code> (默认值:53)</li>
+<li>转发：DNS 转发：<code>127.0.0.1#52</code></li>
+</ol>
+<h3 id="其他问题"><a href="#其他问题" class="headerlink" title="其他问题"></a>其他问题</h3><ol>
+<li><p>默认passwall 不支持 ShadowsocksR Libev 协议 需要手动添加</p>
+<ul>
+<li>解压<code>passwall_packages_ipk_x86_64.zip</code>包,安装相关协议组件即可</li>
+<li>前置依赖 <code>libmbedtls12_2.28.9-1_x86_64.ipk</code></li>
+</ul>
+</li>
+<li><p>ShadowsocksR 旧节点不支持<code>RC4加密</code>算法 可安装 libopenssl-legacy和openssl-util 解决</p>
+</li>
+</ol>
+<h3 id="新增-passwall分流配置"><a href="#新增-passwall分流配置" class="headerlink" title="新增 passwall分流配置"></a>新增 passwall分流配置</h3><ol>
+<li>进入passwall菜单，把“Socks主开关”打勾，点击<code>添加</code>按钮,如图修改设置端口10801和10802（Socks监听端口这个端口号要记住，等下要用到）然后<code>保存并应用</code></li>
+</ol>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/assets/img/msedge_20250121104931_246.png" alt="socks套娃"></p>
+<p>2.点击<code>Socks 配置</code>修改, 将<code>自动切换</code>，打勾,<code>恢复切换</code>，打勾 其他配置根据需要修改,在备用节点的列表中，根据自己实际情况，选择备用节点,设置完成点<code>保存&amp;应用</code>；</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/assets/img/msedge_20250121105152_247.png" alt="socks套娃"></p>
+<ol start="3">
+<li>进入passwall菜单,点击<code>节点列表</code>添加一个节点,类型为“Socks”，地址写“127.0.0.1”，端口写第1个步骤设置的“Socks监听端口(10801)”，点“保存&amp;应用”；</li>
+</ol>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/assets/img/msedge_20250121104548_241.png" alt="socks套娃"></p>
+<ol start="4">
+<li>在passwall主界面，在“TCP节点”处改成上一个步骤我们自己添加的节点名称，点“保存&amp;应用”,来测试一下网络，全部畅通，证明设置有效。</li>
+</ol>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/img/avatar.png" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/img/avatar.png" title="头像" alt="头像"></a><div class="post-copyright__author_name">kikock</div><div class="post-copyright__author_desc"></div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="https://home.34462958.xyz/2025/01/16/OpenWrt%E5%85%BB%E8%80%81%E6%97%81%E8%B7%AF%E7%94%B1%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('https://home.34462958.xyz/2025/01/16/OpenWrt%E5%85%BB%E8%80%81%E6%97%81%E8%B7%AF%E7%94%B1%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B/')">OpenWrt养老旁路由从零开始(基于immortalWrt固件)</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"></div><div class="shareRight"></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特別聲明外，均採用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 許可協議。轉載請註明來自 <a href="https://home.34462958.xyz" target="_blank">不抽烟的🐇</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__category-list"><a class="post-meta__box__categoryes" href="/categories/%E5%85%B6%E4%BB%96/"><span class="categoryes-punctuation"> <i class="anzhiyufont anzhiyu-icon-inbox"></i></span>其他<span class="categoryesPageCount">8</span></a></div><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/openwrt/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>openwrt<span class="tagsPageCount">1</span></a></div></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2024/10/16/Ubuntu%2020.04.6%20%E5%AE%89%E8%A3%85%E5%8F%8A%E5%85%B6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://img.xjh.me/random_img.php?type=bg&amp;return=302&amp;_r_=77178124-6d48-18a0-07c1-b8f2fe07c764" onerror="onerror=null;src='/img/404.webp'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Ubuntu 20.04.6 安装及其网络配置记录</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/img/statusImg.png" alt="status"/></div></div><div class="author-info__description">疑難問題，玄學解釋大師。</div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">kikock</h1><div class="author-info__desc"></div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kikock" target="_blank" title="Github"><i class="anzhiyufont anzhiyu-icon-github"></i></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目錄</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#OpenWrt%E5%85%BB%E8%80%81%E6%97%81%E8%B7%AF%E7%94%B1%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B-%E5%9F%BA%E4%BA%8EimmortalWrt%E5%9B%BA%E4%BB%B6"><span class="toc-number">1.</span> <span class="toc-text">OpenWrt养老旁路由从零开始(基于immortalWrt固件)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">1.1.</span> <span class="toc-text">准备工作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E5%88%B0%E7%9A%84%E7%BB%84%E4%BB%B6"><span class="toc-number">1.2.</span> <span class="toc-text">涉及到的组件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E5%89%8D%E9%9D%A2"><span class="toc-number">1.3.</span> <span class="toc-text">写在前面</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E4%BD%BF%E7%94%A8-iKuai-openwrt-%E5%81%9A%E6%97%81%E8%B7%AF%E7%94%B1%E7%BD%91%E7%BB%9C%E6%8B%93%E6%89%91"><span class="toc-number">1.3.1.</span> <span class="toc-text">1.使用 iKuai +openwrt 做旁路由网络拓扑</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E7%BB%84%E4%BB%B6"><span class="toc-number">1.4.</span> <span class="toc-text">安装组件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#immortalWrt%E5%AE%89%E8%A3%85"><span class="toc-number">1.5.</span> <span class="toc-text">immortalWrt安装</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%98%E7%82%B9"><span class="toc-number">1.5.1.</span> <span class="toc-text">优点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%8E%E5%85%B6%E4%BB%96%E5%88%86%E6%94%AF%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.5.2.</span> <span class="toc-text">与其他分支的区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95"><span class="toc-number">1.5.3.</span> <span class="toc-text">使用方法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Passwall-MosDNS-AdGuardHome%E5%AE%89%E8%A3%85"><span class="toc-number">1.6.</span> <span class="toc-text">Passwall,MosDNS,AdGuardHome安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AF%E8%B7%AF%E7%94%B1%E9%85%8D%E7%BD%AE%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE"><span class="toc-number">1.7.</span> <span class="toc-text">软路由配置安装和配置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E7%8E%AF%E5%A2%83%EF%BC%9A"><span class="toc-number">1.7.1.</span> <span class="toc-text">系统环境：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A4%84%E7%90%86%E9%80%BB%E8%BE%91"><span class="toc-number">1.7.1.1.</span> <span class="toc-text">处理逻辑</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%BB%E8%A6%81%E6%9B%B4%E6%94%B9%E9%85%8D%E7%BD%AE"><span class="toc-number">1.7.1.2.</span> <span class="toc-text">主要更改配置</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E9%97%AE%E9%A2%98"><span class="toc-number">1.8.</span> <span class="toc-text">其他问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B0%E5%A2%9E-passwall%E5%88%86%E6%B5%81%E9%85%8D%E7%BD%AE"><span class="toc-number">1.9.</span> <span class="toc-text">新增 passwall分流配置</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/01/16/OpenWrt%E5%85%BB%E8%80%81%E6%97%81%E8%B7%AF%E7%94%B1%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B/" title="OpenWrt养老旁路由从零开始(基于immortalWrt固件)"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://api.hanximeng.com/ranimg/api.php?_r_=37c2dbde-1417-9756-3212-dbad4a23f29a" onerror="this.onerror=null;this.src='/img/404.webp'" alt="OpenWrt养老旁路由从零开始(基于immortalWrt固件)"/></a><div class="content"><a class="title" href="/2025/01/16/OpenWrt%E5%85%BB%E8%80%81%E6%97%81%E8%B7%AF%E7%94%B1%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B/" title="OpenWrt养老旁路由从零开始(基于immortalWrt固件)">OpenWrt养老旁路由从零开始(基于immortalWrt固件)</a><time datetime="2025-01-16T10:18:00.000Z" title="發表於 2025-01-16 10:18:00">2025-01-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/10/16/Ubuntu%2020.04.6%20%E5%AE%89%E8%A3%85%E5%8F%8A%E5%85%B6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/" title="Ubuntu 20.04.6 安装及其网络配置记录"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://img.xjh.me/random_img.php?type=bg&amp;return=302&amp;_r_=77178124-6d48-18a0-07c1-b8f2fe07c764" onerror="this.onerror=null;this.src='/img/404.webp'" alt="Ubuntu 20.04.6 安装及其网络配置记录"/></a><div class="content"><a class="title" href="/2024/10/16/Ubuntu%2020.04.6%20%E5%AE%89%E8%A3%85%E5%8F%8A%E5%85%B6%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/" title="Ubuntu 20.04.6 安装及其网络配置记录">Ubuntu 20.04.6 安装及其网络配置记录</a><time datetime="2024-10-16T09:23:00.000Z" title="發表於 2024-10-16 09:23:00">2024-10-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/10/16/%E5%9F%BA%E4%BA%8EUbuntu%2020.04.06%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%9E%81%E9%80%9F%E9%83%A8%E7%BD%B2K8S%E9%9B%86%E7%BE%A4/" title="基于Ubuntu 20.04.06操作系统极速部署K8S集群(更新增加kuboard配置)"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://api.btstu.cn/sjbz/?lx=dongman&amp;_r_=7156e2e1-4381-c376-3a88-79476169b7de" onerror="this.onerror=null;this.src='/img/404.webp'" alt="基于Ubuntu 20.04.06操作系统极速部署K8S集群(更新增加kuboard配置)"/></a><div class="content"><a class="title" href="/2024/10/16/%E5%9F%BA%E4%BA%8EUbuntu%2020.04.06%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%9E%81%E9%80%9F%E9%83%A8%E7%BD%B2K8S%E9%9B%86%E7%BE%A4/" title="基于Ubuntu 20.04.06操作系统极速部署K8S集群(更新增加kuboard配置)">基于Ubuntu 20.04.06操作系统极速部署K8S集群(更新增加kuboard配置)</a><time datetime="2024-10-16T09:23:00.000Z" title="發表於 2024-10-16 09:23:00">2024-10-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/10/10/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8gfw%E6%90%AD%E5%BB%BA%E8%AE%B0%E5%BD%95/" title="甲骨文云服务器x-ui面板搭建记录"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://api.hanximeng.com/ranimg/api.php?_r_=abbc5b09-0477-1783-e304-a0ef94f36b74" onerror="this.onerror=null;this.src='/img/404.webp'" alt="甲骨文云服务器x-ui面板搭建记录"/></a><div class="content"><a class="title" href="/2024/10/10/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8gfw%E6%90%AD%E5%BB%BA%E8%AE%B0%E5%BD%95/" title="甲骨文云服务器x-ui面板搭建记录">甲骨文云服务器x-ui面板搭建记录</a><time datetime="2024-10-10T17:23:00.000Z" title="發表於 2024-10-10 17:23:00">2024-10-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/07/16/%E6%B5%B7%E5%A4%96%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%B8%B8%E7%94%A8%E4%B8%80%E9%94%AE%E6%B5%8B%E8%AF%95%E8%84%9A%E6%9C%AC/" title="海外服务器常用一键测试脚本"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://api.hanximeng.com/ranimg/api.php?_r_=ebbef03e-ed32-5856-dac7-f09e579cbd3e" onerror="this.onerror=null;this.src='/img/404.webp'" alt="海外服务器常用一键测试脚本"/></a><div class="content"><a class="title" href="/2024/07/16/%E6%B5%B7%E5%A4%96%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%B8%B8%E7%94%A8%E4%B8%80%E9%94%AE%E6%B5%8B%E8%AF%95%E8%84%9A%E6%9C%AC/" title="海外服务器常用一键测试脚本">海外服务器常用一键测试脚本</a><time datetime="2024-07-16T17:23:00.000Z" title="發表於 2024-07-16 17:23:00">2024-07-16</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div id="workboard"><div id="runtimeTextTip"></div></div><p id="ghbdages"><a class="github-badge" target="_blank" href="https://hexo.io/" style="margin-inline:5px" data-title="博客框架为Hexo_v7.2.0" title="博客框架为Hexo_v7.2.0"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@2.1.5/img/badge/Frame-Hexo.svg" alt="博客框架为Hexo_v7.2.0"/></a><a class="github-badge" target="_blank" href="https://docs.anheyu.com/" style="margin-inline:5px" data-title="本站使用AnZhiYu主题" title="本站使用AnZhiYu主题"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.9/img/Theme-AnZhiYu-2E67D3.svg" alt="本站使用AnZhiYu主题"/></a><a class="github-badge" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" style="margin-inline:5px" data-title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可" title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@2.2.0/img/badge/Copyright-BY-NC-SA.svg" alt="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"/></a></p></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2025 By <a class="footer-bar-link" href="/" title="kikock" target="_blank">kikock</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">26</div></a><a href="/tags/" title="tag"><div class="headline">標籤</div><div class="length-num">14</div></a><a href="/categories/" title="category"><div class="headline">分類</div><div class="length-num">12</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="顯示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>顯示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Cloudflare/" style="font-size: 0.88rem;">Cloudflare<sup>2</sup></a><a href="/tags/GitHub/" style="font-size: 0.88rem;">GitHub<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>5</sup></a><a href="/tags/MC/" style="font-size: 0.88rem;">MC<sup>1</sup></a><a href="/tags/docker/" style="font-size: 0.88rem;">docker<sup>4</sup></a><a href="/tags/git/" style="font-size: 0.88rem;">git<sup>1</sup></a><a href="/tags/java/" style="font-size: 0.88rem;">java<sup>4</sup></a><a href="/tags/mysql/" style="font-size: 0.88rem;">mysql<sup>1</sup></a><a href="/tags/nginx/" style="font-size: 0.88rem;">nginx<sup>1</sup></a><a href="/tags/openwrt/" style="font-size: 0.88rem;">openwrt<sup>1</sup></a><a href="/tags/%E7%A7%91%E5%AD%A6%E4%B8%8A%E7%BD%91/" style="font-size: 0.88rem;">科学上网<sup>1</sup></a><a href="/tags/%E7%BA%B8%E9%A3%9E%E6%9C%BA/" style="font-size: 0.88rem;">纸飞机<sup>1</sup></a><a href="/tags/%E7%BE%A4%E6%99%96/" style="font-size: 0.88rem;">群晖<sup>1</sup></a><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 0.88rem;">设计模式<sup>5</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="閱讀模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="簡繁轉換">繁</button><button id="darkmode" type="button" title="淺色和深色模式轉換"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="單欄和雙欄切換"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="設定"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目錄"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><button id="go-up" type="button" title="回到頂部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script async src="/anzhiyu/random.js"></script><script async="async">(function () {
+  var grt = new Date("05/01/2024 00:00:00"); //设置网站上线时间
+  var now = new Date();
+  var dnum;
+  var hnum;
+  var mnum;
+  var snum;
+  var nowHour;
+
+  // 计算并更新天数、小时数、分钟数和秒数
+  function updateTime() {
+    now = new Date(); // 更新 now 的值
+    nowHour = now.getHours(); // 更新 nowHour 的值
+    var days = (now - grt) / 1000 / 60 / 60 / 24;
+    dnum = Math.floor(days);
+    var hours = (now - grt) / 1000 / 60 / 60 - 24 * dnum;
+    hnum = Math.floor(hours);
+    if (String(hnum).length == 1) {
+      hnum = "0" + hnum;
+    }
+    var minutes = (now - grt) / 1000 / 60 - 24 * 60 * dnum - 60 * hnum;
+    mnum = Math.floor(minutes);
+    if (String(mnum).length == 1) {
+      mnum = "0" + mnum;
+    }
+    var seconds = (now - grt) / 1000 - 24 * 60 * 60 * dnum - 60 * 60 * hnum - 60 * mnum;
+    snum = Math.round(seconds);
+    if (String(snum).length == 1) {
+      snum = "0" + snum;
+    }
+  }
+
+  // 更新网页中显示的网站运行时间
+  function updateHtml() {
+    const footer = document.getElementById("footer");
+    if (!footer) return
+    let currentTimeHtml = "";
+    if (nowHour < 18 && nowHour >= 9) {
+      // 如果是上班时间，默认就是"安知鱼-上班摸鱼中.svg"图片，不需要更改
+      currentTimeHtml = `本站居然运行了 ${dnum} 天<span id='runtime'> ${hnum} 小时 ${mnum} 分 ${snum} 秒 </span><i class='anzhiyufont anzhiyu-icon-heartbeat' style='color:red'></i>`;
+    } else {
+      // 如果是下班时间，插入"安知鱼-下班啦.svg"图片
+      let img = document.querySelector("#workboard .workSituationImg");
+      if (img != null) {
+        img.src = "";
+        img.title = "";
+        img.alt = "";
+      }
+
+      currentTimeHtml = `本站居然运行了 ${dnum} 天<span id='runtime'> ${hnum} 小时 ${mnum} 分 ${snum} 秒 </span><i class='anzhiyufont anzhiyu-icon-heartbeat' style='color:red'></i>`;
+    }
+
+    if (document.getElementById("runtimeTextTip")) {
+      document.getElementById("runtimeTextTip").innerHTML = currentTimeHtml;
+    }
+  }
+
+  setInterval(() => {
+    updateTime();
+    updateHtml();
+  }, 1000);
+})();</script><div class="js-pjax"><input type="hidden" name="page-type" id="page-type" value="post"></div><script async data-pjax src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.1/bubble/bubble.js"></script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="/assets/js/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
