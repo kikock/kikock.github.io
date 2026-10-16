@@ -1,0 +1,742 @@
+<!DOCTYPE html><html lang="zh-TW" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>【大模型2609·Python基础·07】IO与文件系统：文件读写、大文件处理与OS目录遍历 | 不抽烟的🐇</title><meta name="keywords" content="大模型2609,Python,文件操作,IO系统,上下文管理器,OS模块"><meta name="author" content="kikock"><meta name="copyright" content="kikock"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="【大模型2609·Python基础·07】IO与文件系统：文件读写、大文件处理与OS目录遍历"><meta name="application-name" content="【大模型2609·Python基础·07】IO与文件系统：文件读写、大文件处理与OS目录遍历"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="【大模型2609·Python基础·07】IO与文件系统：文件读写、大文件处理与OS目录遍历"><meta property="og:url" content="https://home.34462958.xyz/2026/10/08/011_%E5%B0%9A%E7%A1%85%E8%B0%B7%E5%A4%A7%E6%A8%A1%E5%9E%8B2609/01_Python%E5%9F%BA%E7%A1%80/python-basis-07-file-io/index.html"><meta property="og:site_name" content="不抽烟的🐇"><meta property="og:description" content="专栏导读：深入数据持久化与操作系统交互。本篇系统剖析文本文件与二进制文件的操作范式、open 打开模式安全策略、with 上下文管理协议的资源释放机制；重点突破大文件分块复制与生成器遍历目录技巧，并全面覆盖 os 与 os.path 核心常用 API。   第7章 文件操作7.1 基本概念7.1."><meta property="og:locale" content="zh-TW"><meta property="og:image" content="https://home.34462958.xyz/images/011_%E5%B0%9A%E7%A1%85%E8%B0%B7%E5%A4%A7%E6%A8%A1%E5%9E%8B/01_Python%E5%9F%BA%E7%A1%80/cover.png"><meta property="article:author" content="kikock"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://home.34462958.xyz/images/011_%E5%B0%9A%E7%A1%85%E8%B0%B7%E5%A4%A7%E6%A8%A1%E5%9E%8B/01_Python%E5%9F%BA%E7%A1%80/cover.png"><meta name="description" content="专栏导读：深入数据持久化与操作系统交互。本篇系统剖析文本文件与二进制文件的操作范式、open 打开模式安全策略、with 上下文管理协议的资源释放机制；重点突破大文件分块复制与生成器遍历目录技巧，并全面覆盖 os 与 os.path 核心常用 API。   第7章 文件操作7.1 基本概念7.1."><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="https://home.34462958.xyz/2026/10/08/011_%E5%B0%9A%E7%A1%85%E8%B0%B7%E5%A4%A7%E6%A8%A1%E5%9E%8B2609/01_Python%E5%9F%BA%E7%A1%80/python-basis-07-file-io/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: undefined,
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: {"enable":true,"default":"晚上好👋","list":[{"greeting":"晚安😴","startTime":0,"endTime":5},{"greeting":"早上好鸭👋, 祝你一天好心情！","startTime":6,"endTime":9},{"greeting":"上午好👋, 状态很好，鼓励一下～","startTime":10,"endTime":10},{"greeting":"11点多啦, 在坚持一下就吃饭啦～","startTime":11,"endTime":11},{"greeting":"午安👋, 宝贝","startTime":12,"endTime":14},{"greeting":"🌈充实的一天辛苦啦！","startTime":14,"endTime":18},{"greeting":"19点喽, 奖励一顿丰盛的大餐吧🍔。","startTime":19,"endTime":19},{"greeting":"晚上好👋, 在属于自己的时间好好放松😌~","startTime":20,"endTime":24}]},
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: false,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🏠 智能家居小能手","🔨 设计开发一条虫","🏃 脚踏实地行动派","💢 人菜游戏瘾还大"]},
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '複製成功',
+    error: '複製錯誤',
+    noSupport: '瀏覽器不支援'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '剛剛',
+    min: '分鐘前',
+    hour: '小時前',
+    day: '天前',
+    month: '個月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切換為繁體","cht_to_chs":"你已切換為簡體","day_to_night":"你已切換為深色模式","night_to_day":"你已切換為淺色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '不抽烟的🐇',
+  title: '【大模型2609·Python基础·07】IO与文件系统：文件读写、大文件处理与OS目录遍历',
+  postAI: '',
+  pageFillDescription: '第7章 文件操作, 7.1 基本概念, 7.1.1 文件的概念, 7.1.2 文件路径和文件名, 7.1.3 文件的分类, 7.2 文件的打开和关闭, 7.2.1 open打开文件, 7.2.2 close关闭文件, 7.3 文件读写操作, 7.3.1 文件写操作, 1、覆盖写, 2、追加写, 7.3.2 文件读操作, 1、read([size]), 2、readLine([size]), 3、readLines([size]), 7.3.3 案例：拷贝文件, 7.3.4 复制大文件, 1、使用shutil.copyx2Fshutil.copy2, 2、使用shutil.copyfileobj, 3、使用read(size), 7.3.5 复制目录, 7.4 其他常用函数, 7.4.1 获取文件或目录属性, 7.4.2 操作目录, 1、获取当前工作目录, 2、切换目录, 3、创建目录, 4、重命名目录, 5、遍历目录, 6、删除目录, 7.4.3 操作文件, 1、创建文件, 2、重命名文件, 3、删除文件, 7.4.4 获取目录大小专栏导读深入数据持久化与操作系统交互本篇系统剖析文本文件与二进制文件的操作范式打开模式安全策略上下文管理协议的资源释放机制重点突破大文件分块复制与生成器遍历目录技巧并全面覆盖与核心常用第章文件操作基本概念文件的概念在计算机中文件是存储在磁盘上的数据集合文件可以包含各种类型的数据如文本图像音频视频或程序代码在编写程序的时候数据是以二进制的形式存储在内存的将数据写到磁盘文件的过程称之为持久化文件路径和文件名文件系统通过文件路径和文件名来定位和管理文件文件名通常包含文件的名称和扩展名扩展名又称为文件后缀名用于表示文件的类型例如表示文本文件表示图像文件文件路径可以是绝对路径从文件系统的根目录开始或相对路径相对于当前工作目录绝对路径在系统绝对路径从盘符开始例如在等其他系统绝对路径从根目录开始例如相对路径在系统不是以盘符开始的都是相对路径例如或在等其他系统不是从根路径开始的都是相对路径例如或代表当前路径代表上级目录文件的分类纯文本文件有统一的编码可以被看做存储在磁盘上的长字符串纯文本文件编码格式常见的有等二进制文件没有字符编码的概念直接由与组成如图片文件视频文件等文件的打开和关闭打开文件使用打开或创建文件该方法执行完毕之后返回的是一个对象函数的完整形式参数说明是否必选指定要打开的文件位置文件名或传入一个整数型的文件描述符操作系统层面标识打开文件的编号必选指定文件的操作类型读写追加和打开格式文本二进制可选默认是控制对文件的读写缓冲机制本质是减少磁盘次数磁盘读写速度远慢于内存缓冲先把数据存内存达到阈值再一次性写入磁盘提升效率可选默认指定文本模式下文件的字符编码解码规则会按该编码将磁盘上的字节转换为字符串读或把字符串转换为字节写入磁盘写仅文本模式有效二进制模式设置会直接报错默认表示使用当前系统的默认编码多为多为可选默认指定文本模式下当编码解码出现错误时的处理方式仅文本模式有效二进制模式无编码错误设置无效可选默认仅对文本模式有效控制对文件读取时的换行符解析和写入时的换行符替换解决跨平台换行符不一致的问题旧可选默认控制调用文件对象的方法时是否关闭底层的文件描述符可选默认指定一个自定义的文件打开函数替代内置的默认文件打开逻辑实现自定义的文件访问控制如权限校验加密文件打开自定义路径解析极高级的开发需求如自定义文件权限沙箱内打开文件网络文件流新手完全用不到可选默认模式由基础操作符和格式符组合而成核心基础符个格式符个还有扩展符个组合规则格式符可省略默认文本扩展符按需加类型符号含义注意事项基础操作只读默认文件不存在则报错文件指针在开头只写文件不存在则创建存在则清空原有内容追加写文件不存在则创建文件指针在末尾不覆盖原内容格式标识文本模式默认可省略读写的是字符串需指定支持换行符处理二进制模式读写的是字节串可以用于读写非文本文件图片视频压缩包可执行文件也可以读写文本文件读写字节内容禁止指定扩展标识读写模式叠加在基础后如读写不清空写读清空追加读独占创建写文件不存在则创建存在则报错避免覆盖仅支持整数分种情况新手一般无需修改用默认值即可取值含义默认缓冲文本模式用系统默认缓冲区大小一般字节二进制模式用固定块缓冲无缓冲数据直接读写磁盘仅对二进制模式有效文本模式设置会报错表示行缓冲仅文本模式有效遇到就刷盘表示固定大小缓冲单位字节如表示缓冲常用取值取值含义严格模式默认出现编码错误直接抛出终止程序忽略模式跳过错误的字符继续处理可能导致字符丢失替换模式将错误的字符替换为占位符不会终止程序避免乱码转义替换将错误字符替换为转义序列如代理转义适合读取系统文件将无法解码的字节存为代理字符写入时还原关闭文件文件读写操作文件写操作覆盖写你好世界你好尚硅谷追加写文件读操作表示读取文件所有内容可以从文件中读取数据表示要从文件中读取的数据的长度文本文件中换行符也算作一个字符一次读取所有内容一次读取个字符可以从纯文本文件读取一行可以从纯文本文件读取一行中的个字符如果一行不够个字符只读一行一次读一行一次读一行读取个字符一次读一行读取个字符如果一行的字符数小于则返回该行所有字符读取所有行并返回列表可以从纯文本文件读取个字符所在的所有行例如第行有个字符第行有个字符第行有个字符为则会读取行一次读取所有行返回列表一次读取一行或多行读取个字符所在的行一次读取一行或多行读取个字符所在的行案例拷贝文件复制小文件测试复制大文件优化方向如果文件比较大一次读取整个文件内存压力比较大使用是内置的文件操作工具库仅复制文件内容和文件权限复制文件内容权限元数据创建时间修改时间等更推荐接近系统复制哈希表哈希表使用专门为文件对象复制设计默认分块大小是字节可手动设置更大的分块比如大文件建议设进一步提升速度底层直接依赖实现核心的文件内容复制哈希表哈希表使用复制大文件获取源文件大小字节已复制大小更新已复制大小并打印进度复制进度字节复制完成测试哈希表哈希表复制目录库的是官方推荐的方法能递归复制目录下的所有内容还能保留文件元数据无需自己写递归逻辑简单又高效其他常用函数函数说明移动偏移量并返回新的绝对位置移动的字节数如果是负数表示从倒数第几位开始从哪个位置开始移动为开头为当前位置为末尾不为时需使用二进制模式打开文件返回当前偏移量从开头开始截断文件为个字符无表示从当前位置截断系统下的换行大小个字符将序列中字符串写入文件需要自己加入换行符如果可以读取文件则返回如果可以写入文件则返回如果文件支持随机访问则返回重命名文件删除文件创建目录不支持递归创建递归创建目录获取当前路径进入指定目录获取目录下文件和目录列表删除空目录递归删除空目录将相对路径转换为绝对路径获取路径中的文件名部分获取路径中的目录部分拼接多个路径自动处理路径分隔符将路径分割为目录和文件名的元组将路径分割为文件名和扩展名的元组判断路径是否存在判断路径是否为文件判断路径是否为目录获取文件的大小以字节为单位获取文件的最后访问时间获取文件的最后修改时间获取文件或目录属性演示获取文件或目录信息文件大小文件创建时间文件最后访问时间文件最后修改时间文件最后修改时间文件是否是文件文件是否是目录文件是否存在文件名文件所在目录名文件绝对路径文件所在目录名文件名文件名不带扩展名操作目录获取当前工作目录当前工作目录切换目录获取当前工作目录切换工作目录创建目录创建目录成功创建目录成功重命名目录重命名为成功遍历目录不递归遍历子目录递归遍历子目录返回一个元组文件夹路径文件夹名字文件名要遍历的目录可选默认为自顶向下自底向上可选指定遍历过程中发生异常时的处理函数用于捕获处理遍历错误如权限不足文件被占用可选控制是否跟随目录的软链接快捷方式进行递归遍历正式支持示例代码不递归遍历子目录遍历当前目录下的所有文件和目录不递归递归遍历子目录遍历当前目录下的所有文件和目录递归当前目录当前目录的子目录当前目录下的子文件删除目录删除一级空目录删除多级空目录递归删除非空目录谨慎使用删除一级空目录依次删除多级空目录是空目录删除是空目录删除是空目录删除报错因为不是空目录删除目录及其子目录请谨慎使用删除后不在回收站操作文件创建文件创建文件重命名文件重命名文件删除文件删除文件获取目录大小定义函数递归统计目录大小调用函数目录大小字节使用生成器获取目录大小目录总大小字节',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-10-08 11:30:00',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.2.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像2" src="/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">不抽烟的🐇</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新評論</span></div><div class="aside-list"><span>正在載入中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/AI/" style="font-size: 1.05rem;">AI<sup>7</sup></a><a href="/tags/AI-Agent/" style="font-size: 1.05rem;">AI Agent<sup>3</sup></a><a href="/tags/AI%E5%8A%A9%E6%89%8B/" style="font-size: 1.05rem;">AI助手<sup>1</sup></a><a href="/tags/Antigravity/" style="font-size: 1.05rem;">Antigravity<sup>3</sup></a><a href="/tags/Claude/" style="font-size: 1.05rem;">Claude<sup>2</sup></a><a href="/tags/Clawdbot/" style="font-size: 1.05rem;">Clawdbot<sup>3</sup></a><a href="/tags/Cloudflare/" style="font-size: 1.05rem;">Cloudflare<sup>3</sup></a><a href="/tags/Content-Creation/" style="font-size: 1.05rem;">Content Creation<sup>1</sup></a><a href="/tags/DevOps/" style="font-size: 1.05rem;">DevOps<sup>1</sup></a><a href="/tags/docker/" style="font-size: 1.05rem;">docker<sup>4</sup></a><a href="/tags/Docker/" style="font-size: 1.05rem;">Docker<sup>2</sup></a><a href="/tags/Full-Stack/" style="font-size: 1.05rem;">Full Stack<sup>1</sup></a><a href="/tags/git/" style="font-size: 1.05rem;">git<sup>1</sup></a><a href="/tags/GitHub/" style="font-size: 1.05rem;">GitHub<sup>1</sup></a><a href="/tags/Hermes-Agent/" style="font-size: 1.05rem;">Hermes Agent<sup>1</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>2</sup></a><a href="/tags/Kubernetes/" style="font-size: 1.05rem;">Kubernetes<sup>1</sup></a><a href="/tags/Kuboard/" style="font-size: 1.05rem;">Kuboard<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>11</sup></a><a href="/tags/mihomo/" style="font-size: 1.05rem;">mihomo<sup>2</sup></a><a href="/tags/nginx/" style="font-size: 1.05rem;">nginx<sup>1</sup></a><a href="/tags/openclash/" style="font-size: 1.05rem;">openclash<sup>1</sup></a><a href="/tags/OpenClaw/" style="font-size: 1.05rem;">OpenClaw<sup>4</sup></a><a href="/tags/openwrt/" style="font-size: 1.05rem;">openwrt<sup>2</sup></a><a href="/tags/Rancher/" style="font-size: 1.05rem;">Rancher<sup>1</sup></a><a href="/tags/Shell/" style="font-size: 1.05rem;">Shell<sup>1</sup></a><a href="/tags/Telegram-Bot/" style="font-size: 1.05rem;">Telegram Bot<sup>3</sup></a><a href="/tags/VNC/" style="font-size: 1.05rem;">VNC<sup>1</sup></a><a href="/tags/Windows%E5%AE%89%E8%A3%85/" style="font-size: 1.05rem;">Windows安装<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 1.05rem;">云原生<sup>1</sup></a><a href="/tags/%E5%A4%A7%E9%BE%99%E8%99%BE%E7%83%AD/" style="font-size: 1.05rem;">大龙虾热<sup>1</sup></a><a href="/tags/%E5%B9%B3%E5%8F%B0%E6%95%B4%E5%90%88/" style="font-size: 1.05rem;">平台整合<sup>1</sup></a><a href="/tags/%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/" style="font-size: 1.05rem;">年终总结<sup>1</sup></a><a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" style="font-size: 1.05rem;">微服务<sup>1</sup></a><a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" style="font-size: 1.05rem;">数据库<sup>1</sup></a><a href="/tags/%E6%97%81%E8%B7%AF%E7%94%B1/" style="font-size: 1.05rem;">旁路由<sup>1</sup></a><a href="/tags/%E7%A7%91%E6%8A%80%E5%8E%86%E5%8F%B2/" style="font-size: 1.05rem;">科技历史<sup>2</sup></a><a href="/tags/%E8%87%AA%E5%8A%A8%E5%8C%96/" style="font-size: 1.05rem;">自动化<sup>1</sup></a><a href="/tags/%E8%BF%90%E7%BB%B4/" style="font-size: 1.05rem;">运维<sup>1</sup></a><a href="/tags/%E9%83%A8%E7%BD%B2%E6%95%99%E7%A8%8B/" style="font-size: 1.05rem;">部署教程<sup>3</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>歸檔</span><a class="card-more-btn" href="/archives/" title="檢視更多">
+    <i class="anzhiyufont anzhiyu-icon-angle-right"></i></a></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/10/"><span class="card-archive-list-date">十月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">4</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/08/"><span class="card-archive-list-date">八月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/05/"><span class="card-archive-list-date">五月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/04/"><span class="card-archive-list-date">四月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">4</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/03/"><span class="card-archive-list-date">三月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/02/"><span class="card-archive-list-date">二月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">6</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/01/"><span class="card-archive-list-date">一月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">5</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/12/"><span class="card-archive-list-date">十二月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%B0%9A%E7%A1%85%E8%B0%B7%E5%A4%A7%E6%A8%A1%E5%9E%8B2609/" itemprop="url">尚硅谷大模型2609</a><i class="anzhiyufont anzhiyu-icon-angle-right post-meta-separator"></i><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%B0%9A%E7%A1%85%E8%B0%B7%E5%A4%A7%E6%A8%A1%E5%9E%8B2609/01-Python%E5%9F%BA%E7%A1%80/" itemprop="url">01_Python基础</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B2609/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>大模型2609</span></a><a class="article-meta__tags" href="/tags/Python/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>Python</span></a><a class="article-meta__tags" href="/tags/%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>文件操作</span></a><a class="article-meta__tags" href="/tags/IO%E7%B3%BB%E7%BB%9F/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>IO系统</span></a><a class="article-meta__tags" href="/tags/%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86%E5%99%A8/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>上下文管理器</span></a><a class="article-meta__tags" href="/tags/OS%E6%A8%A1%E5%9D%97/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>OS模块</span></a></span></div></div><h1 class="post-title" itemprop="name headline">【大模型2609·Python基础·07】IO与文件系统：文件读写、大文件处理与OS目录遍历</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">發表於</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2026-10-08T11:30:00.000Z" title="發表於 2026-10-08 11:30:00">2026-10-08</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新於</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2026-10-08T11:30:00.000Z" title="更新於 2026-10-08 11:30:00">2026-10-08</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-wordcount"><i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" title="文章字数"></i><span class="post-meta-label" title="文章字数">字數總計:</span><span class="word-count" title="文章字数">4.4k</span><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" title="阅读时长"></i><span class="post-meta-label" title="阅读时长">閱讀時長:</span><span>17分鐘</span></span><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="【大模型2609·Python基础·07】IO与文件系统：文件读写、大文件处理与OS目录遍历"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">閱讀量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为绵阳"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>绵阳</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="/images/011_%E5%B0%9A%E7%A1%85%E8%B0%B7%E5%A4%A7%E6%A8%A1%E5%9E%8B/01_Python%E5%9F%BA%E7%A1%80/cover.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="https://home.34462958.xyz/2026/10/08/011_%E5%B0%9A%E7%A1%85%E8%B0%B7%E5%A4%A7%E6%A8%A1%E5%9E%8B2609/01_Python%E5%9F%BA%E7%A1%80/python-basis-07-file-io/"><header><a class="post-meta-categories" href="/categories/%E5%B0%9A%E7%A1%85%E8%B0%B7%E5%A4%A7%E6%A8%A1%E5%9E%8B2609/" itemprop="url">尚硅谷大模型2609</a><a class="post-meta-categories" href="/categories/%E5%B0%9A%E7%A1%85%E8%B0%B7%E5%A4%A7%E6%A8%A1%E5%9E%8B2609/01-Python%E5%9F%BA%E7%A1%80/" itemprop="url">01_Python基础</a><a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B2609/" tabindex="-1" itemprop="url">大模型2609</a><a href="/tags/Python/" tabindex="-1" itemprop="url">Python</a><a href="/tags/%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C/" tabindex="-1" itemprop="url">文件操作</a><a href="/tags/IO%E7%B3%BB%E7%BB%9F/" tabindex="-1" itemprop="url">IO系统</a><a href="/tags/%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86%E5%99%A8/" tabindex="-1" itemprop="url">上下文管理器</a><a href="/tags/OS%E6%A8%A1%E5%9D%97/" tabindex="-1" itemprop="url">OS模块</a><h1 id="CrawlerTitle" itemprop="name headline">【大模型2609·Python基础·07】IO与文件系统：文件读写、大文件处理与OS目录遍历</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">kikock</span><time itemprop="dateCreated datePublished" datetime="2026-10-08T11:30:00.000Z" title="發表於 2026-10-08 11:30:00">2026-10-08</time><time itemprop="dateCreated datePublished" datetime="2026-10-08T11:30:00.000Z" title="更新於 2026-10-08 11:30:00">2026-10-08</time></header><blockquote>
+<p><strong>专栏导读</strong>：深入数据持久化与操作系统交互。本篇系统剖析文本文件与二进制文件的操作范式、open 打开模式安全策略、with 上下文管理协议的资源释放机制；重点突破大文件分块复制与生成器遍历目录技巧，并全面覆盖 os 与 os.path 核心常用 API。</p>
+</blockquote>
+<hr>
+<h1 id="第7章-文件操作"><a href="#第7章-文件操作" class="headerlink" title="第7章 文件操作"></a>第7章 文件操作</h1><h2 id="7-1-基本概念"><a href="#7-1-基本概念" class="headerlink" title="7.1 基本概念"></a>7.1 基本概念</h2><h3 id="7-1-1-文件的概念"><a href="#7-1-1-文件的概念" class="headerlink" title="7.1.1 文件的概念"></a>7.1.1 文件的概念</h3><p>在计算机中，文件是存储在磁盘上的数据集合。文件可以包含各种类型的数据，如文本、图像、音频、视频或程序代码。</p>
+<p>在编写程序的时候，数据是以二进制的形式存储在内存的，将数据写到磁盘文件的过程称之为持久化。</p>
+<h3 id="7-1-2-文件路径和文件名"><a href="#7-1-2-文件路径和文件名" class="headerlink" title="7.1.2 文件路径和文件名"></a>7.1.2 文件路径和文件名</h3><p>文件系统通过文件路径和文件名来定位和管理文件。</p>
+<p>（1）文件名通常包含文件的名称和扩展名。扩展名（又称为文件后缀名）用于表示文件的类型（例如 .txt 表示文本文件，.jpg 表示图像文件）。</p>
+<p>（2）文件路径可以是绝对路径（从文件系统的根目录开始）或相对路径（相对于当前工作目录）。</p>
+<ul>
+<li><p>绝对路径：</p>
+<ul>
+<li>在windows系统，绝对路径从盘符开始，例如：D:\atguigu\hello.py</li>
+<li>在Linux、MacOS等其他系统，绝对路径从根目录&#x2F;开始，例如：&#x2F;users&#x2F;hello.py</li>
+</ul>
+</li>
+<li><p>相对路径：</p>
+<ul>
+<li>在windows系统，不是以盘符开始的都是相对路径，例如：.&#x2F;atguigu&#x2F;hello.py 或 ..&#x2F;..&#x2F;hello.py</li>
+<li>在Linux、MacOS等其他系统，不是从根路径&#x2F;开始的都是相对路径：例如：.&#x2F;atguigu&#x2F;hello.py 或 ..&#x2F;..&#x2F;hello.py</li>
+<li>.&#x2F;代表当前路径，..&#x2F;代表上级目录</li>
+</ul>
+</li>
+</ul>
+<h3 id="7-1-3-文件的分类"><a href="#7-1-3-文件的分类" class="headerlink" title="7.1.3 文件的分类"></a>7.1.3 文件的分类</h3><p>1、纯文本文件</p>
+<p>有统一的编码，可以被看做存储在磁盘上的长字符串。</p>
+<p>纯文本文件编码格式常见的有ASCII、ISO-8859-1、GB2312、GBK、UTF-8、UTF-16等。</p>
+<p>2、二进制文件</p>
+<p>没有字符编码的概念，直接由0与1组成。</p>
+<p>如图片文件（jpg、png），视频文件（avi）等。</p>
+<h2 id="7-2-文件的打开和关闭"><a href="#7-2-文件的打开和关闭" class="headerlink" title="7.2 文件的打开和关闭"></a>7.2 文件的打开和关闭</h2><h3 id="7-2-1-open打开文件"><a href="#7-2-1-open打开文件" class="headerlink" title="7.2.1 open打开文件"></a>7.2.1 open打开文件</h3><p>使用 open() 打开或创建文件，该方法执行完毕之后返回的是一个file对象。</p>
+<p>open函数的完整形式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">open</span>(file,mode=<span class="string">&quot;r&quot;</span>,buffering=-<span class="number">1</span>, encoding=<span class="literal">None</span>,errors=<span class="literal">None</span>,newline=<span class="literal">None</span>,closefd=<span class="literal">True</span>,opener=<span class="literal">None</span>)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+<th>是否必选</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>file</td>
+<td>指定要打开的<strong>文件位置 + 文件名</strong>，或传入一个<strong>整数型的文件描述符</strong>（操作系统层面标识打开文件的编号）</td>
+<td>必选</td>
+</tr>
+<tr>
+<td>mode</td>
+<td>指定文件的<strong>操作类型</strong>（读 &#x2F; 写 &#x2F; 追加）和<strong>打开格式</strong>（文本 &#x2F; 二进制）</td>
+<td>可选，默认是r</td>
+</tr>
+<tr>
+<td>buffering</td>
+<td>控制 Python 对文件的<strong>读写缓冲机制</strong>，本质是<strong>减少磁盘 IO 次数</strong>（磁盘读写速度远慢于内存，缓冲先把数据存内存，达到阈值再一次性写入磁盘，提升效率）</td>
+<td>可选，默认-1</td>
+</tr>
+<tr>
+<td>encoding</td>
+<td>指定<strong>文本模式（t）下文件的字符编码 &#x2F; 解码规则</strong>，Python 会按该编码将磁盘上的字节转换为字符串（读），或把字符串转换为字节写入磁盘（写）。<strong>仅文本模式有效</strong>，二进制模式（b）设置<code>encoding</code>会直接报错。默认None表示使用<strong>当前系统的默认编码</strong>（Windows 多为 gbk，Linux&#x2F;Mac 多为 utf-8）</td>
+<td>可选，默认 None</td>
+</tr>
+<tr>
+<td>errors</td>
+<td>指定<strong>文本模式</strong>下，当<strong>编码 &#x2F; 解码出现错误</strong>时的处理方式。仅文本模式有效，二进制模式无编码错误，设置无效。</td>
+<td>可选，默认 None</td>
+</tr>
+<tr>
+<td>newline</td>
+<td>仅对<strong>文本模式</strong>有效，控制 Python 对文件<strong>读取时的换行符解析</strong>和<strong>写入时的换行符替换</strong>，解决跨平台换行符不一致的问题（Windows<code>\r\n</code>、Linux&#x2F;Mac<code>\n</code>、旧 Mac<code>\r</code>）</td>
+<td>可选，默认 None</td>
+</tr>
+<tr>
+<td>closefd</td>
+<td>控制调用文件对象的<code>close()</code>方法时，<strong>是否关闭底层的文件描述符</strong>。</td>
+<td>可选，默认 True</td>
+</tr>
+<tr>
+<td>opener</td>
+<td>指定一个<strong>自定义的文件打开函数</strong>，替代 Python 内置的默认文件打开逻辑，实现自定义的文件访问控制（如权限校验、加密文件打开、自定义路径解析）。极高级的开发需求（如自定义文件权限、沙箱内打开文件、网络文件流），<strong>新手完全用不到</strong>。</td>
+<td>可选，默认 None</td>
+</tr>
+</tbody></table>
+<p>模式由<strong>基础操作符</strong>和<strong>格式符</strong>组合而成，核心基础符 3 个、格式符 2 个，还有扩展符 2 个，组合规则：<strong>格式符可省略（默认文本），扩展符按需加</strong>。</p>
+<table>
+<thead>
+<tr>
+<th align="center">类型</th>
+<th align="center">符号</th>
+<th align="center">含义</th>
+<th align="center">注意事项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><strong>基础操作</strong></td>
+<td align="center">r</td>
+<td align="center">只读（默认）</td>
+<td align="center">文件不存在则报错，文件指针在开头</td>
+</tr>
+<tr>
+<td align="center"></td>
+<td align="center">w</td>
+<td align="center">只写</td>
+<td align="center">文件不存在则创建，存在则<strong>清空原有内容</strong></td>
+</tr>
+<tr>
+<td align="center"></td>
+<td align="center">a</td>
+<td align="center">追加写</td>
+<td align="center">文件不存在则创建，文件指针在末尾，不覆盖原内容</td>
+</tr>
+<tr>
+<td align="center"><strong>格式标识</strong></td>
+<td align="center">t</td>
+<td align="center">文本模式（默认，可省略）</td>
+<td align="center">读写的是<strong>字符串</strong>，需指定<code>encoding</code>，支持换行符处理</td>
+</tr>
+<tr>
+<td align="center"></td>
+<td align="center">b</td>
+<td align="center">二进制模式</td>
+<td align="center">读写的是<strong>bytes 字节串</strong>，可以用于读写非文本文件（图片 &#x2F; 视频 &#x2F; 压缩包 &#x2F; 可执行文件），也可以读写文本文件（读写字节内容，<strong>禁止指定 encoding</strong>）</td>
+</tr>
+<tr>
+<td align="center"><strong>扩展标识</strong></td>
+<td align="center">+</td>
+<td align="center">读写模式（叠加在基础后）</td>
+<td align="center">如<code>r+</code>（读 + 写，不清空）、<code>w+</code>（写 + 读，清空）、<code>a+</code>（追加 + 读）</td>
+</tr>
+<tr>
+<td align="center"></td>
+<td align="center">x</td>
+<td align="center">独占创建写</td>
+<td align="center">文件不存在则创建，存在则报错（避免覆盖）</td>
+</tr>
+</tbody></table>
+<p>buffering仅支持<strong>整数</strong>，分 3 种情况，<strong>新手一般无需修改，用默认值 - 1 即可</strong>：</p>
+<table>
+<thead>
+<tr>
+<th align="center">取值</th>
+<th align="center">含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">-1</td>
+<td align="center">默认缓冲：文本模式用<strong>系统默认缓冲区大小</strong>（一般 4096&#x2F;8192 字节），二进制模式用<strong>固定块缓冲</strong></td>
+</tr>
+<tr>
+<td align="center">0</td>
+<td align="center">无缓冲：数据直接读写磁盘，<strong>仅对二进制模式（b）有效</strong>，文本模式设置 0 会报错</td>
+</tr>
+<tr>
+<td align="center">≥1</td>
+<td align="center">1 表示<strong>行缓冲</strong>（仅文本模式有效，遇到<code>\n</code>就刷盘）；<br />≥2 表示<strong>固定大小缓冲</strong>（单位：字节，如 buffering&#x3D;4096 表示 4K 缓冲）</td>
+</tr>
+</tbody></table>
+<p>errors常用取值：</p>
+<table>
+<thead>
+<tr>
+<th align="center">取值</th>
+<th align="center">含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">strict</td>
+<td align="center">严格模式（默认）：出现编码错误直接抛出<code>UnicodeError</code>，终止程序</td>
+</tr>
+<tr>
+<td align="center">ignore</td>
+<td align="center">忽略模式：跳过错误的字符，继续处理，可能导致<strong>字符丢失</strong></td>
+</tr>
+<tr>
+<td align="center">replace</td>
+<td align="center">替换模式：将错误的字符替换为<code>�</code>（占位符），不会终止程序，避免乱码</td>
+</tr>
+<tr>
+<td align="center">backslashreplace</td>
+<td align="center">转义替换：将错误字符替换为 Python 转义序列（如<code>\x80</code>）</td>
+</tr>
+<tr>
+<td align="center">surrogateescape</td>
+<td align="center">代理转义：适合读取系统文件，将无法解码的字节存为代理字符，写入时还原</td>
+</tr>
+</tbody></table>
+<h3 id="7-2-2-close关闭文件"><a href="#7-2-2-close关闭文件" class="headerlink" title="7.2.2 close关闭文件"></a>7.2.2 close关闭文件</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f.close()</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-3-文件读写操作"><a href="#7-3-文件读写操作" class="headerlink" title="7.3 文件读写操作"></a>7.3 文件读写操作</h2><h3 id="7-3-1-文件写操作"><a href="#7-3-1-文件写操作" class="headerlink" title="7.3.1 文件写操作"></a>7.3.1 文件写操作</h3><h4 id="1、覆盖写"><a href="#1、覆盖写" class="headerlink" title="1、覆盖写"></a>1、覆盖写</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">write_one</span>():</span><br><span class="line">    fw = <span class="built_in">open</span>(<span class="string">&quot;./documents/test.txt&quot;</span>, <span class="string">&quot;w&quot;</span>,encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line">    fw.write(<span class="string">&quot;hello world\n&quot;</span>)</span><br><span class="line">    fw.write(<span class="string">&quot;hello atguigu\n&quot;</span>)</span><br><span class="line">    fw.close()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">write_two</span>():</span><br><span class="line">    fw = <span class="built_in">open</span>(<span class="string">&quot;./documents/test.txt&quot;</span>, <span class="string">&quot;w&quot;</span>,encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line">    fw.write(<span class="string">&quot;你好，世界\n&quot;</span>)</span><br><span class="line">    fw.write(<span class="string">&quot;你好，尚硅谷\n&quot;</span>)</span><br><span class="line">    fw.close()</span><br><span class="line"></span><br><span class="line"><span class="comment"># write_one()</span></span><br><span class="line">write_two()</span><br></pre></td></tr></table></figure>
+
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/images/011_%E5%B0%9A%E7%A1%85%E8%B0%B7%E5%A4%A7%E6%A8%A1%E5%9E%8B/01_Python%E5%9F%BA%E7%A1%80/image-20260204193845931.png" alt="image-20260204193845931"></p>
+<h4 id="2、追加写"><a href="#2、追加写" class="headerlink" title="2、追加写"></a>2、追加写</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">write_append</span>():</span><br><span class="line">    fw = <span class="built_in">open</span>(<span class="string">&quot;./documents/test.txt&quot;</span>, <span class="string">&quot;a&quot;</span>,encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line">    fw.write(<span class="string">&quot;python\n&quot;</span>)</span><br><span class="line">    fw.write(<span class="string">&quot;ai\n&quot;</span>)</span><br><span class="line">    fw.close()</span><br><span class="line"></span><br><span class="line">write_append()</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="7-3-2-文件读操作"><a href="#7-3-2-文件读操作" class="headerlink" title="7.3.2 文件读操作"></a>7.3.2 文件读操作</h3><h4 id="1、read-size"><a href="#1、read-size" class="headerlink" title="1、read([size])"></a>1、read([size])</h4><ul>
+<li>read()表示读取文件所有内容</li>
+<li>read([size]) 可以从文件中读取数据，size 表示要从文件中读取的数据的长度。文本文件中换行符也算作一个字符。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;一次读取所有内容&quot;</span>.center(<span class="number">50</span>, <span class="string">&quot;-&quot;</span>))</span><br><span class="line">fr = <span class="built_in">open</span>(<span class="string">&quot;documents/test.txt&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(fr.read())</span><br><span class="line">fr.close()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;一次读取10个字符&quot;</span>.center(<span class="number">50</span>, <span class="string">&quot;-&quot;</span>))</span><br><span class="line">fr = <span class="built_in">open</span>(<span class="string">&quot;documents/test.txt&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(fr.read(<span class="number">10</span>))</span><br><span class="line">fr.close()</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="2、readLine-size"><a href="#2、readLine-size" class="headerlink" title="2、readLine([size])"></a>2、readLine([size])</h4><ul>
+<li>readLine()可以从纯文本文件读取一行</li>
+<li>readLine(size)可以从纯文本文件读取一行中的size个字符。如果一行不够size个字符，只读一行。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;一次读一行&quot;</span>.center(<span class="number">50</span>,<span class="string">&quot;-&quot;</span>))</span><br><span class="line">fr = <span class="built_in">open</span>(<span class="string">&quot;documents/test.txt&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(fr.readline())</span><br><span class="line">fr.close()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;一次读一行&quot;</span>.center(<span class="number">50</span>,<span class="string">&quot;-&quot;</span>))</span><br><span class="line">fr = <span class="built_in">open</span>(<span class="string">&quot;documents/test.txt&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(fr.readline(<span class="number">3</span>)) <span class="comment"># 读取3个字符</span></span><br><span class="line">fr.close()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;一次读一行&quot;</span>.center(<span class="number">50</span>,<span class="string">&quot;-&quot;</span>))</span><br><span class="line">fr = <span class="built_in">open</span>(<span class="string">&quot;documents/test.txt&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(fr.readline(<span class="number">30</span>)) <span class="comment"># 读取30个字符，如果一行的字符数小于30，则返回该行所有字符</span></span><br><span class="line">fr.close()</span><br></pre></td></tr></table></figure>
+
+<h4 id="3、readLines-size"><a href="#3、readLines-size" class="headerlink" title="3、readLines([size])"></a>3、readLines([size])</h4><ul>
+<li>readLines()：读取所有行并返回列表</li>
+<li>readLines(size)：可以从纯文本文件读取size个字符所在的所有行。例如：第1行有5个字符，第2行有10个字符，第3行有5个字符，size为8则会读取2行。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;一次读取所有行，返回列表&quot;</span>.center(<span class="number">50</span>, <span class="string">&quot;-&quot;</span>))</span><br><span class="line">fr = <span class="built_in">open</span>(<span class="string">&quot;documents/test.txt&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(fr.readlines())</span><br><span class="line">fr.close()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;一次读取一行或多行&quot;</span>.center(<span class="number">50</span>, <span class="string">&quot;-&quot;</span>))</span><br><span class="line">fr = <span class="built_in">open</span>(<span class="string">&quot;documents/test.txt&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(fr.readlines(<span class="number">3</span>)) <span class="comment"># 读取3个字符所在的行</span></span><br><span class="line">fr.close()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;一次读取一行或多行&quot;</span>.center(<span class="number">50</span>, <span class="string">&quot;-&quot;</span>))</span><br><span class="line">fr = <span class="built_in">open</span>(<span class="string">&quot;documents/test.txt&quot;</span>, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(fr.readlines(<span class="number">30</span>)) <span class="comment"># 读取30个字符所在的行</span></span><br><span class="line">fr.close()</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-3-3-案例：拷贝文件"><a href="#7-3-3-案例：拷贝文件" class="headerlink" title="7.3.3 案例：拷贝文件"></a>7.3.3 案例：拷贝文件</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 复制小文件</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">copy_small_file</span>(<span class="params">src, dst</span>):</span><br><span class="line">    fr = <span class="built_in">open</span>(src, <span class="string">&quot;rb&quot;</span>)</span><br><span class="line">    fw = <span class="built_in">open</span>(dst, <span class="string">&quot;wb&quot;</span>)</span><br><span class="line">    fw.write(fr.read())</span><br><span class="line">    fr.close()</span><br><span class="line">    fw.close()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试</span></span><br><span class="line">copy_small_file(<span class="string">&quot;documents/test.txt&quot;</span>, <span class="string">&quot;copy/test_copy.txt&quot;</span>)</span><br><span class="line">copy_small_file(<span class="string">&quot;documents/dog.jpg&quot;</span>, <span class="string">&quot;copy/dog_copy.jpg&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="7-3-4-复制大文件"><a href="#7-3-4-复制大文件" class="headerlink" title="7.3.4 复制大文件"></a>7.3.4 复制大文件</h3><blockquote>
+<p>优化方向：如果文件比较大，一次读取整个文件，内存压力比较大</p>
+</blockquote>
+<h4 id="1、使用shutil-copy-shutil-copy2"><a href="#1、使用shutil-copy-shutil-copy2" class="headerlink" title="1、使用shutil.copy&#x2F;shutil.copy2"></a>1、使用shutil.copy&#x2F;shutil.copy2</h4><p><code>shutil</code> 是 Python 内置的文件操作工具库。</p>
+<ul>
+<li><code>shutil.copy(src, dst)</code>：仅复制文件内容和<strong>文件权限</strong>；</li>
+<li><code>shutil.copy2(src, dst)</code>：复制文件内容 + 权限 +<strong>元数据</strong>（创建时间、修改时间等，更推荐，接近系统复制）。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line">shutil.copy2(<span class="string">r&quot;documents/哈希表.mp4&quot;</span>, <span class="string">r&quot;copy/哈希表_copy.mp4&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h4 id="2、使用shutil-copyfileobj"><a href="#2、使用shutil-copyfileobj" class="headerlink" title="2、使用shutil.copyfileobj"></a>2、使用shutil.copyfileobj</h4><p><code>copyfileobj</code> 专门为文件对象复制设计，默认分块大小是 8192 字节，可手动设置更大的分块（比如 1024*1024&#x3D;1MB，大文件建议设 1MB~16MB），进一步提升速度。<code>copy/copy2</code>底层直接依赖<code>copyfileobj</code>实现核心的文件内容复制。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line">shutil.copyfileobj(<span class="built_in">open</span>(<span class="string">&quot;documents/哈希表.mp4&quot;</span>, <span class="string">&quot;rb&quot;</span>), <span class="built_in">open</span>(<span class="string">&quot;copy/哈希表_copy.mp4&quot;</span>,<span class="string">&quot;wb&quot;</span>), <span class="number">1024</span>*<span class="number">1024</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="3、使用read-size"><a href="#3、使用read-size" class="headerlink" title="3、使用read(size)"></a>3、使用read(size)</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="comment"># 复制大文件</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">copy_big_file</span>(<span class="params">src, dst</span>):</span><br><span class="line">    fr = <span class="built_in">open</span>(src, <span class="string">&quot;rb&quot;</span>)</span><br><span class="line">    fw = <span class="built_in">open</span>(dst, <span class="string">&quot;wb&quot;</span>)</span><br><span class="line">    <span class="comment"># 获取源文件大小（字节）</span></span><br><span class="line">    file_size = os.path.getsize(src)</span><br><span class="line">    copied_size = <span class="number">0</span>  <span class="comment"># 已复制大小</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        data = fr.read(<span class="number">1024</span>*<span class="number">1024</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> data:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        fw.write(data)</span><br><span class="line">        <span class="comment"># 更新已复制大小并打印进度</span></span><br><span class="line">        copied_size += <span class="built_in">len</span>(data)</span><br><span class="line">        progress = (copied_size / file_size) * <span class="number">100</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;\r复制进度：<span class="subst">&#123;progress:<span class="number">.2</span>f&#125;</span>% (<span class="subst">&#123;copied_size&#125;</span>/<span class="subst">&#123;file_size&#125;</span> 字节)&quot;</span>, end=<span class="string">&quot;&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;\n复制完成！&quot;</span>)</span><br><span class="line">    fr.close()</span><br><span class="line">    fw.close()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试</span></span><br><span class="line">copy_big_file(<span class="string">&quot;documents/哈希表.mp4&quot;</span>, <span class="string">&quot;copy/哈希表_copy.mp4&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-3-5-复制目录"><a href="#7-3-5-复制目录" class="headerlink" title="7.3.5 复制目录"></a>7.3.5 复制目录</h3><p><code>shutil</code>库的<code>copytree()</code>是官方推荐的方法，能递归复制目录下的所有内容，还能保留文件元数据，无需自己写递归逻辑，简单又高效。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"></span><br><span class="line">shutil.copytree(<span class="string">&quot;documents&quot;</span>,<span class="string">&quot;documents_copy&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-4-其他常用函数"><a href="#7-4-其他常用函数" class="headerlink" title="7.4 其他常用函数"></a>7.4 其他常用函数</h2><table>
+<thead>
+<tr>
+<th><strong>函数</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>file.seek(offset[,from])</strong></td>
+<td>移动偏移量并返回新的绝对位置。  offset：移动的字节数，如果是负数表示从倒数第几位开始。  from：从哪个位置开始移动；0为开头，1为当前位置，2为末尾。from不为0时需使用’b’二进制模式打开文件。</td>
+</tr>
+<tr>
+<td><strong>file.tell()</strong></td>
+<td>返回当前偏移量</td>
+</tr>
+<tr>
+<td><strong>file.truncate([size])</strong></td>
+<td>从开头开始截断文件为size个字符，无size表示从当前位置截断。windows系统下的换行大小2个字符</td>
+</tr>
+<tr>
+<td><strong>file.writelines(seq)</strong></td>
+<td>将序列中字符串写入文件，需要自己加入换行符</td>
+</tr>
+<tr>
+<td><strong>file.readable()</strong></td>
+<td>如果可以读取文件则返回True</td>
+</tr>
+<tr>
+<td><strong>file.writeable()</strong></td>
+<td>如果可以写入文件则返回True</td>
+</tr>
+<tr>
+<td><strong>file.seekable()</strong></td>
+<td>如果文件支持随机访问则返回True</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>os.rename(old,new)</strong></td>
+<td>重命名文件</td>
+</tr>
+<tr>
+<td><strong>os.remove(file)</strong></td>
+<td>删除文件</td>
+</tr>
+<tr>
+<td><strong>os.mkdir(dir)</strong></td>
+<td>创建目录，不支持递归创建</td>
+</tr>
+<tr>
+<td><strong>os.makedirs(dir)</strong></td>
+<td>递归创建目录</td>
+</tr>
+<tr>
+<td><strong>os.getcwd()</strong></td>
+<td>获取当前路径</td>
+</tr>
+<tr>
+<td><strong>os.chdir(dir)</strong></td>
+<td>进入指定目录</td>
+</tr>
+<tr>
+<td><strong>os.listdir(dir)</strong></td>
+<td>获取目录下文件和目录列表</td>
+</tr>
+<tr>
+<td><strong>os.rmdir(dir)</strong></td>
+<td>删除空目录</td>
+</tr>
+<tr>
+<td><strong>os.removedirs(dir)</strong></td>
+<td>递归删除空目录</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>os.path.abspath(path)</strong></td>
+<td>将相对路径转换为绝对路径</td>
+</tr>
+<tr>
+<td><strong>os.path.basename(path)</strong></td>
+<td>获取路径中的文件名部分</td>
+</tr>
+<tr>
+<td><strong>os.path.dirname(path)</strong></td>
+<td>获取路径中的目录部分</td>
+</tr>
+<tr>
+<td><strong>os.path.join(*paths)</strong></td>
+<td>拼接多个路径，自动处理路径分隔符</td>
+</tr>
+<tr>
+<td><strong>os.path.split(path)</strong></td>
+<td>将路径分割为目录和文件名的元组</td>
+</tr>
+<tr>
+<td><strong>os.path.splitext(path)</strong></td>
+<td>将路径分割为文件名和扩展名的元组</td>
+</tr>
+<tr>
+<td><strong>os.path.exists(path)</strong></td>
+<td>判断路径是否存在</td>
+</tr>
+<tr>
+<td><strong>os.path.isfile(path)</strong></td>
+<td>判断路径是否为文件</td>
+</tr>
+<tr>
+<td><strong>os.path.isdir(path)</strong></td>
+<td>判断路径是否为目录</td>
+</tr>
+<tr>
+<td><strong>os.path.getsize(path)</strong></td>
+<td>获取文件的大小，以字节为单位</td>
+</tr>
+<tr>
+<td><strong>os.path.getatime(path)</strong></td>
+<td>获取文件的最后访问时间</td>
+</tr>
+<tr>
+<td><strong>os.path.getmtime(path)</strong></td>
+<td>获取文件的最后修改时间</td>
+</tr>
+</tbody></table>
+<h3 id="7-4-1-获取文件或目录属性"><a href="#7-4-1-获取文件或目录属性" class="headerlink" title="7.4.1 获取文件或目录属性"></a>7.4.1 获取文件或目录属性</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    演示获取文件或目录信息</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> os.path</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;test.txt文件大小：&quot;</span>, os.path.getsize(<span class="string">&quot;documents/test.txt&quot;</span>))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;test.txt文件创建时间：&quot;</span>, os.path.getctime(<span class="string">&quot;documents/test.txt&quot;</span>))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;test.txt文件最后访问时间：&quot;</span>, os.path.getatime(<span class="string">&quot;documents/test.txt&quot;</span>))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;test.txt文件最后修改时间：&quot;</span>, os.path.getmtime(<span class="string">&quot;documents/test.txt&quot;</span>))</span><br><span class="line">mtime = time.localtime(os.path.getmtime(<span class="string">&quot;documents/test.txt&quot;</span>))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;test.txt文件最后修改时间：&quot;</span>, time.strftime(<span class="string">&quot;%Y-%m-%d %H:%M:%S&quot;</span>, mtime))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;test.txt文件是否是文件：&quot;</span>, os.path.isfile(<span class="string">&quot;documents/test.txt&quot;</span>))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;test.txt文件是否是目录：&quot;</span>, os.path.isdir(<span class="string">&quot;documents/test.txt&quot;</span>))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;test.txt文件是否存在：&quot;</span>, os.path.exists(<span class="string">&quot;documents/test.txt&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;文件名：&quot;</span>, os.path.basename(<span class="string">&quot;documents/test.txt&quot;</span>))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;文件所在目录名：&quot;</span>, os.path.dirname(<span class="string">&quot;documents/test.txt&quot;</span>))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;文件绝对路径：&quot;</span>, os.path.abspath(<span class="string">&quot;documents/test.txt&quot;</span>))</span><br><span class="line"></span><br><span class="line">tuple_result = os.path.split(<span class="string">&quot;documents/test.txt&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;文件所在目录名：&quot;</span>, tuple_result[<span class="number">0</span>])</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;文件名：&quot;</span>, tuple_result[<span class="number">1</span>])</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;文件名（不带扩展名）：&quot;</span>, os.path.splitext(tuple_result[<span class="number">1</span>])[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-4-2-操作目录"><a href="#7-4-2-操作目录" class="headerlink" title="7.4.2 操作目录"></a>7.4.2 操作目录</h3><h4 id="1、获取当前工作目录"><a href="#1、获取当前工作目录" class="headerlink" title="1、获取当前工作目录"></a>1、获取当前工作目录</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">current_working_directory = os.getcwd()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;当前工作目录：&quot;</span>, current_working_directory)</span><br></pre></td></tr></table></figure>
+
+<h4 id="2、切换目录"><a href="#2、切换目录" class="headerlink" title="2、切换目录"></a>2、切换目录</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;获取当前工作目录：&quot;</span>, os.getcwd())</span><br><span class="line"></span><br><span class="line">os.chdir(<span class="string">&quot;..&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;切换工作目录：&quot;</span>, os.getcwd())</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="3、创建目录"><a href="#3、创建目录" class="headerlink" title="3、创建目录"></a>3、创建目录</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">&quot;code&quot;</span>):</span><br><span class="line">    os.mkdir(<span class="string">&quot;code&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;创建目录code成功&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">&quot;code/python/section/one&quot;</span>):</span><br><span class="line">    os.makedirs(<span class="string">&quot;code/python/section/one&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;创建目录code/python/section/one成功&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h4 id="4、重命名目录"><a href="#4、重命名目录" class="headerlink" title="4、重命名目录"></a>4、重命名目录</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">os.rename(<span class="string">&quot;code&quot;</span>,<span class="string">&quot;python_code&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;重命名code为python_code成功&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h4 id="5、遍历目录"><a href="#5、遍历目录" class="headerlink" title="5、遍历目录"></a>5、遍历目录</h4><ul>
+<li><p>os.listdir：不递归遍历子目录</p>
+</li>
+<li><p>os.walk：递归遍历子目录</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 返回一个3元组(dirpath文件夹路径, dirnames文件夹名字, filenames文件名)</span></span><br><span class="line">os.walk(</span><br><span class="line">    top,  <span class="comment"># 要遍历的目录</span></span><br><span class="line">    topdown=<span class="literal">True</span>,  <span class="comment"># 可选，默认为True:自顶向下，False:自底向上</span></span><br><span class="line">    onerror=<span class="literal">None</span>,  <span class="comment"># 可选，指定遍历过程中发生异常时的处理函数，用于捕获 / 处理遍历错误（如权限不足、文件被占用）</span></span><br><span class="line">    followlinks=<span class="literal">False</span>,  <span class="comment"># 可选，控制是否跟随目录的软链接 / 快捷方式进行递归遍历（Python3.5 + 正式支持）</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>示例代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1、不递归遍历子目录</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;遍历当前目录下的所有文件和目录（不递归）：&quot;</span>)</span><br><span class="line">project_dir = os.path.dirname(os.getcwd())</span><br><span class="line"><span class="keyword">for</span> s <span class="keyword">in</span> os.listdir(project_dir):</span><br><span class="line">    <span class="built_in">print</span>(s)</span><br><span class="line"><span class="built_in">print</span>()</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 2、递归遍历子目录</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;遍历当前目录下的所有文件和目录（递归）：&quot;</span>)</span><br><span class="line">current_dir = os.getcwd()</span><br><span class="line"><span class="keyword">for</span> root, dirs, files <span class="keyword">in</span> os.walk(current_dir):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;当前目录：&quot;</span>,root)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;当前目录的子目录：&quot;</span>,dirs)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;当前目录下的子文件：&quot;</span>,files)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;-&quot;</span> * <span class="number">20</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="6、删除目录"><a href="#6、删除目录" class="headerlink" title="6、删除目录"></a>6、删除目录</h4><ul>
+<li>os.rmdir：删除一级空目录</li>
+<li>os.removedirs：删除多级空目录</li>
+<li>shutil.rmtree：递归删除非空目录（谨慎使用）</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除一级空目录</span></span><br><span class="line">one_dir = <span class="string">&quot;./python_code/python/section/one&quot;</span></span><br><span class="line"><span class="keyword">if</span> os.path.exists(one_dir):</span><br><span class="line">    os.rmdir(one_dir)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 依次删除多级空目录</span></span><br><span class="line">dirs = <span class="string">&quot;./python_code/python/section&quot;</span></span><br><span class="line"><span class="keyword">if</span> os.path.exists(dirs):</span><br><span class="line">    os.removedirs(dirs)</span><br><span class="line">    <span class="comment"># section是空目录，删除</span></span><br><span class="line">    <span class="comment"># python是空目录，删除</span></span><br><span class="line">    <span class="comment"># python_code是空目录，删除</span></span><br><span class="line"></span><br><span class="line">copy_dir = <span class="string">&quot;./copy&quot;</span></span><br><span class="line"><span class="keyword">if</span> os.path.exists(copy_dir):</span><br><span class="line"><span class="comment">#      os.rmdir(copy_dir) # 报错，因为copy_dir不是空目录</span></span><br><span class="line">    shutil.rmtree(copy_dir) <span class="comment"># 删除目录及其子目录，请谨慎使用，删除后不在回收站</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="7-4-3-操作文件"><a href="#7-4-3-操作文件" class="headerlink" title="7.4.3 操作文件"></a>7.4.3 操作文件</h3><h4 id="1、创建文件"><a href="#1、创建文件" class="headerlink" title="1、创建文件"></a>1、创建文件</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建文件</span></span><br><span class="line"><span class="built_in">open</span>(<span class="string">&quot;documents/test1.txt&quot;</span>, <span class="string">&quot;w&quot;</span>).close()</span><br></pre></td></tr></table></figure>
+
+<h4 id="2、重命名文件"><a href="#2、重命名文件" class="headerlink" title="2、重命名文件"></a>2、重命名文件</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 重命名文件</span></span><br><span class="line">os.rename(<span class="string">&quot;documents/test1.txt&quot;</span>, <span class="string">&quot;documents/test2.txt&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h4 id="3、删除文件"><a href="#3、删除文件" class="headerlink" title="3、删除文件"></a>3、删除文件</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 删除文件</span></span><br><span class="line">os.remove(<span class="string">&quot;documents/test2.txt&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="7-4-4-获取目录大小"><a href="#7-4-4-获取目录大小" class="headerlink" title="7.4.4 获取目录大小"></a>7.4.4 获取目录大小</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义函数：递归统计目录大小</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_dir_size</span>(<span class="params">path</span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(path):</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    <span class="keyword">if</span> os.path.isfile(path):</span><br><span class="line">        <span class="keyword">return</span> os.path.getsize(path)</span><br><span class="line">    total_size = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> inner_sub <span class="keyword">in</span> os.listdir(path):</span><br><span class="line">        sub_path = os.path.join(path, inner_sub)</span><br><span class="line">        total_size += get_dir_size(sub_path)</span><br><span class="line">    <span class="keyword">return</span> total_size</span><br><span class="line"><span class="comment"># 调用函数</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;documents目录大小：&quot;</span>, get_dir_size(<span class="string">&#x27;./documents&#x27;</span>), <span class="string">&quot;字节&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用os.walk+生成器 ：获取目录大小</span></span><br><span class="line"><span class="comment"># total_size = sum(os.path.getsize(os.path.join(r, f)) for r, _, fs in os.walk(r&quot;documents&quot;) for f in fs if not os.path.islink(os.path.join(r, f)))</span></span><br><span class="line"><span class="comment"># print(f&quot;目录总大小：&#123;total_size&#125; 字节&quot;)</span></span><br></pre></td></tr></table></figure>
+
+
+<hr>
+<!-- ═══════════ 第8章 面向对象之类和对象 ═══════════ -->
+<!-- flag of hidden posts --></article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/img/avatar.png" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/img/avatar.png" title="头像" alt="头像"></a><div class="post-copyright__author_name">kikock</div><div class="post-copyright__author_desc"></div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="https://home.34462958.xyz/2026/10/08/011_%E5%B0%9A%E7%A1%85%E8%B0%B7%E5%A4%A7%E6%A8%A1%E5%9E%8B2609/01_Python%E5%9F%BA%E7%A1%80/python-basis-07-file-io/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('https://home.34462958.xyz/2026/10/08/011_%E5%B0%9A%E7%A1%85%E8%B0%B7%E5%A4%A7%E6%A8%A1%E5%9E%8B2609/01_Python%E5%9F%BA%E7%A1%80/python-basis-07-file-io/')">【大模型2609·Python基础·07】IO与文件系统：文件读写、大文件处理与OS目录遍历</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"></div><div class="shareRight"></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特別聲明外，均採用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 許可協議。轉載請註明來自 <a href="https://home.34462958.xyz" target="_blank">不抽烟的🐇</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__category-list"><a class="post-meta__box__categoryes" href="/categories/%E5%B0%9A%E7%A1%85%E8%B0%B7%E5%A4%A7%E6%A8%A1%E5%9E%8B2609/"><span class="categoryes-punctuation"> <i class="anzhiyufont anzhiyu-icon-inbox"></i></span>尚硅谷大模型2609<span class="categoryesPageCount">24</span></a><a class="post-meta__box__categoryes" href="/categories/%E5%B0%9A%E7%A1%85%E8%B0%B7%E5%A4%A7%E6%A8%A1%E5%9E%8B2609/01-Python%E5%9F%BA%E7%A1%80/"><span class="categoryes-punctuation"> <i class="anzhiyufont anzhiyu-icon-inbox"></i></span>01_Python基础<span class="categoryesPageCount">15</span></a></div><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B2609/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>大模型2609<span class="tagsPageCount">24</span></a><a class="post-meta__box__tags" href="/tags/Python/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Python<span class="tagsPageCount">15</span></a><a class="post-meta__box__tags" href="/tags/%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>文件操作<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/IO%E7%B3%BB%E7%BB%9F/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>IO系统<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86%E5%99%A8/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>上下文管理器<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/OS%E6%A8%A1%E5%9D%97/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>OS模块<span class="tagsPageCount">1</span></a></div></div></div></div><nav class="pagination-post" id="pagination"></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/img/statusImg.png" alt="status"/></div></div><div class="author-info__description">疑難問題，玄學解釋大師。</div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">kikock</h1><div class="author-info__desc"></div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kikock" target="_blank" title="Github"><i class="anzhiyufont anzhiyu-icon-github"></i></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目錄</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC7%E7%AB%A0-%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C"><span class="toc-number">1.</span> <span class="toc-text">第7章 文件操作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#7-1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">1.1.</span> <span class="toc-text">7.1 基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-1-%E6%96%87%E4%BB%B6%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="toc-number">1.1.1.</span> <span class="toc-text">7.1.1 文件的概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-2-%E6%96%87%E4%BB%B6%E8%B7%AF%E5%BE%84%E5%92%8C%E6%96%87%E4%BB%B6%E5%90%8D"><span class="toc-number">1.1.2.</span> <span class="toc-text">7.1.2 文件路径和文件名</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-3-%E6%96%87%E4%BB%B6%E7%9A%84%E5%88%86%E7%B1%BB"><span class="toc-number">1.1.3.</span> <span class="toc-text">7.1.3 文件的分类</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-2-%E6%96%87%E4%BB%B6%E7%9A%84%E6%89%93%E5%BC%80%E5%92%8C%E5%85%B3%E9%97%AD"><span class="toc-number">1.2.</span> <span class="toc-text">7.2 文件的打开和关闭</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-1-open%E6%89%93%E5%BC%80%E6%96%87%E4%BB%B6"><span class="toc-number">1.2.1.</span> <span class="toc-text">7.2.1 open打开文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-2-close%E5%85%B3%E9%97%AD%E6%96%87%E4%BB%B6"><span class="toc-number">1.2.2.</span> <span class="toc-text">7.2.2 close关闭文件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-3-%E6%96%87%E4%BB%B6%E8%AF%BB%E5%86%99%E6%93%8D%E4%BD%9C"><span class="toc-number">1.3.</span> <span class="toc-text">7.3 文件读写操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-1-%E6%96%87%E4%BB%B6%E5%86%99%E6%93%8D%E4%BD%9C"><span class="toc-number">1.3.1.</span> <span class="toc-text">7.3.1 文件写操作</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1%E3%80%81%E8%A6%86%E7%9B%96%E5%86%99"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">1、覆盖写</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2%E3%80%81%E8%BF%BD%E5%8A%A0%E5%86%99"><span class="toc-number">1.3.1.2.</span> <span class="toc-text">2、追加写</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-2-%E6%96%87%E4%BB%B6%E8%AF%BB%E6%93%8D%E4%BD%9C"><span class="toc-number">1.3.2.</span> <span class="toc-text">7.3.2 文件读操作</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1%E3%80%81read-size"><span class="toc-number">1.3.2.1.</span> <span class="toc-text">1、read([size])</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2%E3%80%81readLine-size"><span class="toc-number">1.3.2.2.</span> <span class="toc-text">2、readLine([size])</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3%E3%80%81readLines-size"><span class="toc-number">1.3.2.3.</span> <span class="toc-text">3、readLines([size])</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-3-%E6%A1%88%E4%BE%8B%EF%BC%9A%E6%8B%B7%E8%B4%9D%E6%96%87%E4%BB%B6"><span class="toc-number">1.3.3.</span> <span class="toc-text">7.3.3 案例：拷贝文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-4-%E5%A4%8D%E5%88%B6%E5%A4%A7%E6%96%87%E4%BB%B6"><span class="toc-number">1.3.4.</span> <span class="toc-text">7.3.4 复制大文件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1%E3%80%81%E4%BD%BF%E7%94%A8shutil-copy-shutil-copy2"><span class="toc-number">1.3.4.1.</span> <span class="toc-text">1、使用shutil.copy&#x2F;shutil.copy2</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2%E3%80%81%E4%BD%BF%E7%94%A8shutil-copyfileobj"><span class="toc-number">1.3.4.2.</span> <span class="toc-text">2、使用shutil.copyfileobj</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3%E3%80%81%E4%BD%BF%E7%94%A8read-size"><span class="toc-number">1.3.4.3.</span> <span class="toc-text">3、使用read(size)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-5-%E5%A4%8D%E5%88%B6%E7%9B%AE%E5%BD%95"><span class="toc-number">1.3.5.</span> <span class="toc-text">7.3.5 复制目录</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-4-%E5%85%B6%E4%BB%96%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0"><span class="toc-number">1.4.</span> <span class="toc-text">7.4 其他常用函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-4-1-%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E6%88%96%E7%9B%AE%E5%BD%95%E5%B1%9E%E6%80%A7"><span class="toc-number">1.4.1.</span> <span class="toc-text">7.4.1 获取文件或目录属性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-4-2-%E6%93%8D%E4%BD%9C%E7%9B%AE%E5%BD%95"><span class="toc-number">1.4.2.</span> <span class="toc-text">7.4.2 操作目录</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1%E3%80%81%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E5%B7%A5%E4%BD%9C%E7%9B%AE%E5%BD%95"><span class="toc-number">1.4.2.1.</span> <span class="toc-text">1、获取当前工作目录</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2%E3%80%81%E5%88%87%E6%8D%A2%E7%9B%AE%E5%BD%95"><span class="toc-number">1.4.2.2.</span> <span class="toc-text">2、切换目录</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3%E3%80%81%E5%88%9B%E5%BB%BA%E7%9B%AE%E5%BD%95"><span class="toc-number">1.4.2.3.</span> <span class="toc-text">3、创建目录</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4%E3%80%81%E9%87%8D%E5%91%BD%E5%90%8D%E7%9B%AE%E5%BD%95"><span class="toc-number">1.4.2.4.</span> <span class="toc-text">4、重命名目录</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5%E3%80%81%E9%81%8D%E5%8E%86%E7%9B%AE%E5%BD%95"><span class="toc-number">1.4.2.5.</span> <span class="toc-text">5、遍历目录</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#6%E3%80%81%E5%88%A0%E9%99%A4%E7%9B%AE%E5%BD%95"><span class="toc-number">1.4.2.6.</span> <span class="toc-text">6、删除目录</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-4-3-%E6%93%8D%E4%BD%9C%E6%96%87%E4%BB%B6"><span class="toc-number">1.4.3.</span> <span class="toc-text">7.4.3 操作文件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1%E3%80%81%E5%88%9B%E5%BB%BA%E6%96%87%E4%BB%B6"><span class="toc-number">1.4.3.1.</span> <span class="toc-text">1、创建文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2%E3%80%81%E9%87%8D%E5%91%BD%E5%90%8D%E6%96%87%E4%BB%B6"><span class="toc-number">1.4.3.2.</span> <span class="toc-text">2、重命名文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3%E3%80%81%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6"><span class="toc-number">1.4.3.3.</span> <span class="toc-text">3、删除文件</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-4-4-%E8%8E%B7%E5%8F%96%E7%9B%AE%E5%BD%95%E5%A4%A7%E5%B0%8F"><span class="toc-number">1.4.4.</span> <span class="toc-text">7.4.4 获取目录大小</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/10/16/clash-fake-ip-tun-guide/" title="深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/images/clash-fake-ip/cover.png" onerror="this.onerror=null;this.src='/img/404.webp'" alt="深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战"/></a><div class="content"><a class="title" href="/2026/10/16/clash-fake-ip-tun-guide/" title="深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战">深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战</a><time datetime="2026-10-16T09:30:00.000Z" title="發表於 2026-10-16 09:30:00">2026-10-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/14/iOS-Shadowrocket-WLOC-Location-Mock-Guide/" title="iOS 免越狱位置修改实战指南：基于 Shadowrocket 与 WLOC 模块"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/images/ios-wloc-location-mock-cover.jpg" onerror="this.onerror=null;this.src='/img/404.webp'" alt="iOS 免越狱位置修改实战指南：基于 Shadowrocket 与 WLOC 模块"/></a><div class="content"><a class="title" href="/2026/10/14/iOS-Shadowrocket-WLOC-Location-Mock-Guide/" title="iOS 免越狱位置修改实战指南：基于 Shadowrocket 与 WLOC 模块">iOS 免越狱位置修改实战指南：基于 Shadowrocket 与 WLOC 模块</a><time datetime="2026-10-14T16:16:00.000Z" title="發表於 2026-10-14 16:16:00">2026-10-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/07/%E4%B8%AD%E5%9B%BD%E5%AE%89%E5%8D%93%E5%8F%98%E5%BD%A2%E8%AE%B0%EF%BC%9A%E4%BB%8EMIUI%E5%88%B0%E9%B8%BF%E8%92%99%E7%9A%84%E5%8D%81%E4%BA%94%E5%B9%B4/" title="中国安卓变形记：从 MIUI 到鸿蒙的十五年"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/images/china-android/cover.png" onerror="this.onerror=null;this.src='/img/404.webp'" alt="中国安卓变形记：从 MIUI 到鸿蒙的十五年"/></a><div class="content"><a class="title" href="/2026/10/07/%E4%B8%AD%E5%9B%BD%E5%AE%89%E5%8D%93%E5%8F%98%E5%BD%A2%E8%AE%B0%EF%BC%9A%E4%BB%8EMIUI%E5%88%B0%E9%B8%BF%E8%92%99%E7%9A%84%E5%8D%81%E4%BA%94%E5%B9%B4/" title="中国安卓变形记：从 MIUI 到鸿蒙的十五年">中国安卓变形记：从 MIUI 到鸿蒙的十五年</a><time datetime="2026-10-07T10:38:00.000Z" title="發表於 2026-10-07 10:38:00">2026-10-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/01/OpenWrt%E5%85%BB%E8%80%81%E6%97%81%E8%B7%AF%E7%94%B1%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B(%E5%9F%BA%E4%BA%8EOpenClash%E4%B8%8EMihomo%E5%86%85%E6%A0%B8)/" title="OpenWrt养老旁路由从零开始(基于OpenClash与Mihomo内核)"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://api.btstu.cn/sjbz/?lx=dongman&amp;_r_=0061fc57-6d68-3ff6-61fd-45e7e5211875" onerror="this.onerror=null;this.src='/img/404.webp'" alt="OpenWrt养老旁路由从零开始(基于OpenClash与Mihomo内核)"/></a><div class="content"><a class="title" href="/2026/10/01/OpenWrt%E5%85%BB%E8%80%81%E6%97%81%E8%B7%AF%E7%94%B1%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B(%E5%9F%BA%E4%BA%8EOpenClash%E4%B8%8EMihomo%E5%86%85%E6%A0%B8)/" title="OpenWrt养老旁路由从零开始(基于OpenClash与Mihomo内核)">OpenWrt养老旁路由从零开始(基于OpenClash与Mihomo内核)</a><time datetime="2026-10-01T11:10:00.000Z" title="發表於 2026-10-01 11:10:00">2026-10-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/08/28/Linux-ops-box-%E7%B3%BB%E7%BB%9F%E8%BF%90%E7%BB%B4%E5%B7%A5%E5%85%B7%E7%AE%B1/" title="Linux-ops-box 终极系统运维工具箱：企业级 Linux 自动化运维指南"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://api.hanximeng.com/ranimg/api.php?_r_=c112b05e-090d-4e4c-15de-92e6ea7645bd" onerror="this.onerror=null;this.src='/img/404.webp'" alt="Linux-ops-box 终极系统运维工具箱：企业级 Linux 自动化运维指南"/></a><div class="content"><a class="title" href="/2026/08/28/Linux-ops-box-%E7%B3%BB%E7%BB%9F%E8%BF%90%E7%BB%B4%E5%B7%A5%E5%85%B7%E7%AE%B1/" title="Linux-ops-box 终极系统运维工具箱：企业级 Linux 自动化运维指南">Linux-ops-box 终极系统运维工具箱：企业级 Linux 自动化运维指南</a><time datetime="2026-08-28T15:30:00.000Z" title="發表於 2026-08-28 15:30:00">2026-08-28</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div id="workboard"><div id="runtimeTextTip"></div></div><p id="ghbdages"><a class="github-badge" target="_blank" href="https://hexo.io/" style="margin-inline:5px" data-title="博客框架为Hexo_v7.2.0" title="博客框架为Hexo_v7.2.0"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@2.1.5/img/badge/Frame-Hexo.svg" alt="博客框架为Hexo_v7.2.0"/></a><a class="github-badge" target="_blank" href="https://docs.anheyu.com/" style="margin-inline:5px" data-title="本站使用AnZhiYu主题" title="本站使用AnZhiYu主题"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.9/img/Theme-AnZhiYu-2E67D3.svg" alt="本站使用AnZhiYu主题"/></a><a class="github-badge" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" style="margin-inline:5px" data-title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可" title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@2.2.0/img/badge/Copyright-BY-NC-SA.svg" alt="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"/></a></p></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2026 By <a class="footer-bar-link" href="/" title="kikock" target="_blank">kikock</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a><a class="footer-bar-link" href="/privacy/" title="隐私政策">隐私政策</a><a class="footer-bar-link" href="/terms/" title="免责声明">免责声明</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">69</div></a><a href="/tags/" title="tag"><div class="headline">標籤</div><div class="length-num">194</div></a><a href="/categories/" title="category"><div class="headline">分類</div><div class="length-num">38</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="顯示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>顯示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/AI/" style="font-size: 0.88rem;">AI<sup>7</sup></a><a href="/tags/AI-Agent/" style="font-size: 0.88rem;">AI Agent<sup>3</sup></a><a href="/tags/AI%E5%8A%A9%E6%89%8B/" style="font-size: 0.88rem;">AI助手<sup>1</sup></a><a href="/tags/Antigravity/" style="font-size: 0.88rem;">Antigravity<sup>3</sup></a><a href="/tags/Claude/" style="font-size: 0.88rem;">Claude<sup>2</sup></a><a href="/tags/Clawdbot/" style="font-size: 0.88rem;">Clawdbot<sup>3</sup></a><a href="/tags/Cloudflare/" style="font-size: 0.88rem;">Cloudflare<sup>3</sup></a><a href="/tags/Content-Creation/" style="font-size: 0.88rem;">Content Creation<sup>1</sup></a><a href="/tags/DevOps/" style="font-size: 0.88rem;">DevOps<sup>1</sup></a><a href="/tags/docker/" style="font-size: 0.88rem;">docker<sup>4</sup></a><a href="/tags/Docker/" style="font-size: 0.88rem;">Docker<sup>2</sup></a><a href="/tags/Full-Stack/" style="font-size: 0.88rem;">Full Stack<sup>1</sup></a><a href="/tags/git/" style="font-size: 0.88rem;">git<sup>1</sup></a><a href="/tags/GitHub/" style="font-size: 0.88rem;">GitHub<sup>1</sup></a><a href="/tags/Hermes-Agent/" style="font-size: 0.88rem;">Hermes Agent<sup>1</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>2</sup></a><a href="/tags/Kubernetes/" style="font-size: 0.88rem;">Kubernetes<sup>1</sup></a><a href="/tags/Kuboard/" style="font-size: 0.88rem;">Kuboard<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>11</sup></a><a href="/tags/mihomo/" style="font-size: 0.88rem;">mihomo<sup>2</sup></a><a href="/tags/nginx/" style="font-size: 0.88rem;">nginx<sup>1</sup></a><a href="/tags/openclash/" style="font-size: 0.88rem;">openclash<sup>1</sup></a><a href="/tags/OpenClaw/" style="font-size: 0.88rem;">OpenClaw<sup>4</sup></a><a href="/tags/openwrt/" style="font-size: 0.88rem;">openwrt<sup>2</sup></a><a href="/tags/Rancher/" style="font-size: 0.88rem;">Rancher<sup>1</sup></a><a href="/tags/Shell/" style="font-size: 0.88rem;">Shell<sup>1</sup></a><a href="/tags/Telegram-Bot/" style="font-size: 0.88rem;">Telegram Bot<sup>3</sup></a><a href="/tags/VNC/" style="font-size: 0.88rem;">VNC<sup>1</sup></a><a href="/tags/Windows%E5%AE%89%E8%A3%85/" style="font-size: 0.88rem;">Windows安装<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 0.88rem;">云原生<sup>1</sup></a><a href="/tags/%E5%A4%A7%E9%BE%99%E8%99%BE%E7%83%AD/" style="font-size: 0.88rem;">大龙虾热<sup>1</sup></a><a href="/tags/%E5%B9%B3%E5%8F%B0%E6%95%B4%E5%90%88/" style="font-size: 0.88rem;">平台整合<sup>1</sup></a><a href="/tags/%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/" style="font-size: 0.88rem;">年终总结<sup>1</sup></a><a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" style="font-size: 0.88rem;">微服务<sup>1</sup></a><a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" style="font-size: 0.88rem;">数据库<sup>1</sup></a><a href="/tags/%E6%97%81%E8%B7%AF%E7%94%B1/" style="font-size: 0.88rem;">旁路由<sup>1</sup></a><a href="/tags/%E7%A7%91%E6%8A%80%E5%8E%86%E5%8F%B2/" style="font-size: 0.88rem;">科技历史<sup>2</sup></a><a href="/tags/%E8%87%AA%E5%8A%A8%E5%8C%96/" style="font-size: 0.88rem;">自动化<sup>1</sup></a><a href="/tags/%E8%BF%90%E7%BB%B4/" style="font-size: 0.88rem;">运维<sup>1</sup></a><a href="/tags/%E9%83%A8%E7%BD%B2%E6%95%99%E7%A8%8B/" style="font-size: 0.88rem;">部署教程<sup>3</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="閱讀模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="簡繁轉換">繁</button><button id="darkmode" type="button" title="淺色和深色模式轉換"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="單欄和雙欄切換"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="設定"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目錄"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><button id="go-up" type="button" title="回到頂部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script async src="/anzhiyu/random.js"></script><script async="async">(function () {
+  var grt = new Date("05/01/2024 00:00:00"); //设置网站上线时间
+  var now = new Date();
+  var dnum;
+  var hnum;
+  var mnum;
+  var snum;
+  var nowHour;
+
+  // 计算并更新天数、小时数、分钟数和秒数
+  function updateTime() {
+    now = new Date(); // 更新 now 的值
+    nowHour = now.getHours(); // 更新 nowHour 的值
+    var days = (now - grt) / 1000 / 60 / 60 / 24;
+    dnum = Math.floor(days);
+    var hours = (now - grt) / 1000 / 60 / 60 - 24 * dnum;
+    hnum = Math.floor(hours);
+    if (String(hnum).length == 1) {
+      hnum = "0" + hnum;
+    }
+    var minutes = (now - grt) / 1000 / 60 - 24 * 60 * dnum - 60 * hnum;
+    mnum = Math.floor(minutes);
+    if (String(mnum).length == 1) {
+      mnum = "0" + mnum;
+    }
+    var seconds = (now - grt) / 1000 - 24 * 60 * 60 * dnum - 60 * 60 * hnum - 60 * mnum;
+    snum = Math.round(seconds);
+    if (String(snum).length == 1) {
+      snum = "0" + snum;
+    }
+  }
+
+  // 更新网页中显示的网站运行时间
+  function updateHtml() {
+    const footer = document.getElementById("footer");
+    if (!footer) return
+    let currentTimeHtml = "";
+    if (nowHour < 18 && nowHour >= 9) {
+      // 如果是上班时间，默认就是"安知鱼-上班摸鱼中.svg"图片，不需要更改
+      currentTimeHtml = `本站居然运行了 ${dnum} 天<span id='runtime'> ${hnum} 小时 ${mnum} 分 ${snum} 秒 </span><i class='anzhiyufont anzhiyu-icon-heartbeat' style='color:red'></i>`;
+    } else {
+      // 如果是下班时间，插入"安知鱼-下班啦.svg"图片
+      let img = document.querySelector("#workboard .workSituationImg");
+      if (img != null) {
+        img.src = "";
+        img.title = "";
+        img.alt = "";
+      }
+
+      currentTimeHtml = `本站居然运行了 ${dnum} 天<span id='runtime'> ${hnum} 小时 ${mnum} 分 ${snum} 秒 </span><i class='anzhiyufont anzhiyu-icon-heartbeat' style='color:red'></i>`;
+    }
+
+    if (document.getElementById("runtimeTextTip")) {
+      document.getElementById("runtimeTextTip").innerHTML = currentTimeHtml;
+    }
+  }
+
+  setInterval(() => {
+    updateTime();
+    updateHtml();
+  }, 1000);
+})();</script><div class="js-pjax"><input type="hidden" name="page-type" id="page-type" value="post"></div><script async data-pjax src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.1/bubble/bubble.js"></script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="/assets/js/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

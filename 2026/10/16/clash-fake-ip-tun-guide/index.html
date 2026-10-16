@@ -1,0 +1,1203 @@
+<!DOCTYPE html><html lang="zh-TW" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战 | 不抽烟的🐇</title><meta name="keywords" content="mihomo,clash,fake-ip,tun,dns,代理分流"><meta name="author" content="kikock"><meta name="copyright" content="kikock"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战"><meta name="application-name" content="深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战"><meta property="og:url" content="https://home.34462958.xyz/2026/10/16/clash-fake-ip-tun-guide/index.html"><meta property="og:site_name" content="不抽烟的🐇"><meta property="og:description" content="现象切入：一个令无数开发者困惑的排网谜团在配置好本地 Clash Verge Rev &amp;#x2F; Mihomo 并开启内核 TUN 模式后，在终端执行以下网络诊断命令： 123456789# 查询自定义域名解析nslookup 870306666.xyz# 返回结果：# Address: 198."><meta property="og:locale" content="zh-TW"><meta property="og:image" content="https://home.34462958.xyz/images/clash-fake-ip/cover.png"><meta property="article:author" content="kikock"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://home.34462958.xyz/images/clash-fake-ip/cover.png"><meta name="description" content="现象切入：一个令无数开发者困惑的排网谜团在配置好本地 Clash Verge Rev &amp;#x2F; Mihomo 并开启内核 TUN 模式后，在终端执行以下网络诊断命令： 123456789# 查询自定义域名解析nslookup 870306666.xyz# 返回结果：# Address: 198."><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="https://home.34462958.xyz/2026/10/16/clash-fake-ip-tun-guide/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: undefined,
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: {"enable":true,"default":"晚上好👋","list":[{"greeting":"晚安😴","startTime":0,"endTime":5},{"greeting":"早上好鸭👋, 祝你一天好心情！","startTime":6,"endTime":9},{"greeting":"上午好👋, 状态很好，鼓励一下～","startTime":10,"endTime":10},{"greeting":"11点多啦, 在坚持一下就吃饭啦～","startTime":11,"endTime":11},{"greeting":"午安👋, 宝贝","startTime":12,"endTime":14},{"greeting":"🌈充实的一天辛苦啦！","startTime":14,"endTime":18},{"greeting":"19点喽, 奖励一顿丰盛的大餐吧🍔。","startTime":19,"endTime":19},{"greeting":"晚上好👋, 在属于自己的时间好好放松😌~","startTime":20,"endTime":24}]},
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: false,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🏠 智能家居小能手","🔨 设计开发一条虫","🏃 脚踏实地行动派","💢 人菜游戏瘾还大"]},
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '複製成功',
+    error: '複製錯誤',
+    noSupport: '瀏覽器不支援'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '剛剛',
+    min: '分鐘前',
+    hour: '小時前',
+    day: '天前',
+    month: '個月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切換為繁體","cht_to_chs":"你已切換為簡體","day_to_night":"你已切換為深色模式","night_to_day":"你已切換為淺色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '不抽烟的🐇',
+  title: '深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战',
+  postAI: '',
+  pageFillDescription: '现象切入：一个令无数开发者困惑的排网谜团, 🚀 交互式数据流沙盒 (支持「海外代理」与「国内直连」双场景模拟), 一、为什么会有 Fake-IP？（解决什么根本痛点）, Fake-IP 的颠覆性设计哲学：【假 IP 换真时效延迟真实解析】, 二、端到端完整链路生命周期（TUN 模式实战）, 📌 链路 10 大核心阶段技术解剖表, 三、为什么 nslookup 会报错？, 四、Fake-IP 是如何彻底根治 DNS 泄露的？, 五、终极解惑：真实 DNS 究竟在什么时候、由谁去查？, 🖼️ Clash Verge Rev 原生界面 (GUI) 与 底层 YAML 实时等高联动对比, 六、24 项核心参数深度对照速查表, 七、总结与最佳实践现象切入一个令无数开发者困惑的排网谜团在配置好本地并开启内核模式后在终端执行以下网络诊断命令查询自定义域名解析返回结果尝试直接向公网阿里查询返回结果然而在浏览器中输入该网址却能瞬间顺畅秒级渲染为什么拿到的是一个奇特的地址为什么指定阿里依然查不出来真实的到底在什么时候由谁去查询的泄露又是如何被根除的本文将通过动态流转沙盒与原生全景联动控制台带你从内核网卡驱动虚拟内存池到境外出口彻底拆解这套现代网络核心架构交互式数据流沙盒支持海外代理与国内直连双场景模拟操作提示点击下方海外模式或国内模式按钮切换场景再点击开始模拟即可动态见证在境外代理本机查询海外代查与境内直连延迟真实解析握手时查国内之间的本质分水岭端到端数据流转动态仿真双路由沙盒直观对比海外代理与国内直连在模式下的关键分水岭海外模式走代理国内模式走直连测试域名分流策略走海外代理策略组开始模拟重置应用发起解析发起分配假秒回内核劫持向假建立握手核心逆向查表假还原原始域名海外远端代查域名进加密隧道出海系统仿真器就绪当前为海外模式点击右上角开始模拟或切换模式分流策略走海外代理策略组海外远端代查域名进加密隧道出海已切换至海外模式如点击开始模拟观察代查机制分流策略直连国内直连握手握手瞬间查阿里拿真已切换至国内模式如点击开始模拟观察延迟真实解析机制拦截本地内存池闪电分配应用信任该向发起网卡在内核级抓取核心逆向查表还原为原始域名命中分流规则走海外代理策略组原始域名打包进加密隧道发往境外本机物理发包个海外节点在当地出口完成无污染解析并建立连接杜绝一切泄露命中分流规则走直连延迟解析生效在握手瞬间调用阿里安全获取国内真实公网中国电信本地网卡直连建立一为什么会有解决什么根本痛点在早期传统的代理客户端中普遍采用的是模式致命的握手时延浏览器想要访问本地必须先通过公网发起一次真正的解析即便通过代理查远端也必须先承担一个完整的跨国才能拿到真实开始建立连接严重的泄露与污染如果向本地运营商发起解析访问的目标网站明文瞬间在本地宽带被记录并极易遭遇投毒阻断域名丢失当应用程序拿到真实发出网络包后网卡上只有四层目标原始域名丢失代理软件只能吃力地依赖反向域名嗅探的颠覆性设计哲学假换真时效延迟真实解析在本机直接充当首选服务器任何应用来查时根本不向公网发出任何查询包而是直接从保留网段抓取一个未占用的假如并在本地内存构建映射字典这一过程完全发生在本地内存中耗时通常小于毫秒二端到端完整链路生命周期模式实战图表渲染说明本节包含交互式动态时序图与大核心流转阶段深度拆解全链路时序流转图矢量实时渲染用户程序如内核网络栈虚拟网卡内置引擎核心分流路由引擎目标服务器远端代理节点解析劫持查询本地内存池分配假映射秒级返回向发起驱动在内核级抓取该数据包送入核心逆向查表还原规则判定走代理海外节点将原始域名直接打包进加密隧道发给海外由海外在当地出口发起真实无污染解析规则判定走直连在握手瞬间调用国内查询真实本机物理网卡与真实直连握手数据双向回传伪装回的响应报文用户程序无缝收到网页内容加载失败启用备用渲染失败链路大核心阶段技术解剖表阶段序号发生位置执行动作关键技术机制耗时网络开销发起解析用户层浏览器调用系统解析域名浏览器按标准逻辑查询本机配置的首选极微内核劫持内核网卡驱动拦截系统发往端口的包流量强制送入内置监听端口如分配假内存表发现不在黑名单中秒级应答不发任何公网包在内存建立键值对内存应用连接操作系统网络栈应用程序信任假向发送假充当会话句柄应用以为连接正在建立捕获驱动捕获所有三层数据包并注入核心绕过本地代理设置捕获全局所有进程的流量核心查表路由引擎提取目标反查内存表还原为原始域名彻底解决真实四层流量域名丢失问题恢复出原始字符串哈希反查代理出海海外出口原始域名打包进密文包由远端海外在境外执行真实无污染解析并建立连接跨国直连握手本地物理网卡若命中直连握手瞬间查国内获得国内真实物理网卡直连国内服务器国内双向回传核心回传远端服务器响应数据包经核心解密后伪装回传给应用应用程序完全无感知顺畅接收到真正的网页与数据极速秒开三为什么会报错驱动的全局劫持开启模式后虚拟网卡抓取全机的全部出站数据包即使你显式指定该数据包也根本飞不出物理网卡而是被驱动塞进了标准应用专用诊断工具浏览器微信等调用的是标准系统拿到假后顺畅通过与完成还原属于底层网络诊断工具它跳过系统自己构造原生报文对报文头部的权威应答标志有极其严苛的校验遇到拦截代理环境容易因格式差异抛出四是如何彻底根治泄露的很多用户常问我的本地宽带运营商能不能知道我访问了哪些境外网站在模式下泄露在物理逻辑上被彻底扼杀本地发包量为在访问境外域名时本地电脑根本没有向外界发送任何数据包运营商抓包结果为代理协议远端代查流量送入时打包的是原始域名字符串整个数据包通过高强度加密飞向海外由海外服务器在境外出口完成真实解析大防泄露黄金配置参数在规则上加上避免规则匹配时在本地提前触发真实解析坚决关闭解析彻底堵死国内宽带运营商通过旁路窃取明文的后门国内直连域名走加密的全程运行在密文中旁路无法窥探兜底规则走代理配置末尾保持选择代理节点未命中域名的流量统一加密出海五终极解惑真实究竟在什么时候由谁去查访问目标类型命中分流规则真正查询的时刻由谁执行真正的查询本地运营商能否抓到明文境外代理域名代理策略组远端收到代理包的瞬间海外节点本机完全不查完全无法探知本地流量境内直连域名浏览器发起握手的瞬间本地内核仅看到向阿里腾讯的密文带的规则不触发解析直接按匹配不查询无原生界面与底层实时等高联动对比操作提示左侧为复刻的原生长控制台右侧为底层代码点击左侧长面板中的任意一个开关或输入框右侧代码将自动平滑滚动并高亮相应的配置字段并浮现深度技术避坑指南覆写重置为默认值高级覆写开关按订阅独立保存仅对对应订阅生效如果你不清楚这里的设置请不要修改并保持覆写关闭设置启用监听地址增强模式范围范围过滤模式启用解析优先使用使用协议遵循路由规则连接遵循路由规则使用启用通过文件解析域名使用系统启用通过系统文件解析域名直连域名服务器遵循策略是否遵循设置默认域名服务器解析服务器自身默认域名服务器兜底列表用逗号分隔回退服务器回退服务器列表用逗号分隔代理节点仅用于解析代理节点的域名用逗号分隔直连域名服务器直连出口域名解析支持过滤跳过解析的域名域名服务器策略特定域名的服务器格式回退过滤设置过滤启用回退过滤国家代码回退不使用回退服务器的回退域名使用回退服务器的域名设置自定义域名到或域名的映射取消保存当前聚焦核心模式开启后本地不再向公网发送查询包响应假推迟真实查询消灭泄露并提速启用模块监听端口推荐增强模式核心假池网段假范围过滤模式解析防泄露坚决关闭优先使用建议关闭防干扰遵循分流路由规则使用忽略系统防系统旧映射污染直连域名服务器遵循策略默认域名服务器解析域名自身域名服务器兜底通用代理节点专用解析拉取节点核心保障直连专用域名服务器回退服务器过滤白名单直连解析真实域名服务器策略内外智能分流与回退过滤设置自定义静态映射表对应底层控制是否启动内置解析模块开启模式时必须置为否则无法实现假劫持对应底层指定监听端口在下建议配置为驱动会自动将端口重定向进去避免与系统共享冲突对应底层核心模式本地不发公网秒回假消除污染与泄露提速对应底层专用的性能测试保留网段提供万个假空间公网永远不冲突对应底层假地址池在已关闭解析的情况下该项处于休眠状态对应底层黑名单机制出现在列表里的域名强制解析真实对应底层强烈建议保持关闭杜绝电脑通过宽带运营商旁路发生明文泄露的最关键防线对应底层国内部分运营商对干扰丢包严重建议保持关闭走稳定的对应底层让请求自身也遵循节点分流防止境外解析因迷路而超时对应底层允许命中配置文件中的自定义映射表对应底层关闭可避免操作系统自身的文件对代理分流造成未知污染对应底层白名单机制凡在此列表中的域名强制查询真实建议加入微软测活域名防止感叹号对应底层核心分流策略境内域名走阿里腾讯海外未匹配走对应底层控制直连出口是否强制遵循保持保证直连高效对应底层纯服务器如在代理未建立时专门用于解析域名自身对应底层兜底通用上游列表对应底层启用回退过滤校验在模式下主要靠分流对应底层判断国家代码用于判断是否为境内对应底层过滤运营商恶意劫持的黑洞段如对应底层强制让这些特征域名走回退服务器解析对应底层自建节点生命线专门用于解析海外订阅源域名代理未连接时也能拉取节点对应底层回退服务器列表模式下留空即可对应底层直连专用域名服务器留空时采用系统默认对应底层自定义静态映射表日常使用保持为空即可六项核心参数深度对照速查表板块界面控件名称来自图片客户端长图状态生产配置文件对应行状态评估与架构建议基础设置启用开启完全一致基础设置监听地址推荐保持避开端口冲突基础设置增强模式完全一致基础设置范围完全一致基础设置范围未配置缺省因关闭不生效无需配置基础设置过滤模式未显式配置内核默认实际等效基础设置解析开关关闭坚决保持关闭防泄露关键基础设置优先使用关闭完全一致防丢包基础设置遵循路由规则开启完全一致基础设置使用开启未显式配置默认完全一致基础设置使用系统关闭完全一致防系统旧污染域名分流过滤常规列表生产配置更优防感叹号域名分流域名服务器策略内外分流完全一致域名分流直连遵循策略关闭未配置默认无需配置域名分流默认域名服务器完全一致域名分流域名服务器完全一致回退与代理过滤开启未配置下不依赖由精准分流代替回退与代理国家代码未配置由分流代替回退与代理回退等未配置由分流代替回退与代理回退域名等未配置由规则库直接命中更精确回退与代理回退服务器留空未配置均保持留空回退与代理代理节点阿里腾讯完全一致拉取节点核心保障回退与代理直连域名服务器留空未配置均保持留空映射示例占位符完全一致日常留空七总结与最佳实践认准真假在开启后查到是完全符合协议设计的正常行为不需要惊慌切勿在强行监听在模式下将监听端口改为依靠驱动从内核层转发是兼顾稳定性与权限的最优实践保持覆写关闭如客户端长图顶部提示所言直接以维护良好的订阅文件为准运行既能保证节点订阅动态更新又不会产生未知的配置覆盖冲突',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-10-16 09:30:00',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.2.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像2" src="/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">不抽烟的🐇</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新評論</span></div><div class="aside-list"><span>正在載入中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/AI/" style="font-size: 1.05rem;">AI<sup>7</sup></a><a href="/tags/AI-Agent/" style="font-size: 1.05rem;">AI Agent<sup>3</sup></a><a href="/tags/AI%E5%8A%A9%E6%89%8B/" style="font-size: 1.05rem;">AI助手<sup>1</sup></a><a href="/tags/Antigravity/" style="font-size: 1.05rem;">Antigravity<sup>3</sup></a><a href="/tags/Claude/" style="font-size: 1.05rem;">Claude<sup>2</sup></a><a href="/tags/Clawdbot/" style="font-size: 1.05rem;">Clawdbot<sup>3</sup></a><a href="/tags/Cloudflare/" style="font-size: 1.05rem;">Cloudflare<sup>3</sup></a><a href="/tags/Content-Creation/" style="font-size: 1.05rem;">Content Creation<sup>1</sup></a><a href="/tags/DevOps/" style="font-size: 1.05rem;">DevOps<sup>1</sup></a><a href="/tags/docker/" style="font-size: 1.05rem;">docker<sup>4</sup></a><a href="/tags/Docker/" style="font-size: 1.05rem;">Docker<sup>2</sup></a><a href="/tags/Full-Stack/" style="font-size: 1.05rem;">Full Stack<sup>1</sup></a><a href="/tags/git/" style="font-size: 1.05rem;">git<sup>1</sup></a><a href="/tags/GitHub/" style="font-size: 1.05rem;">GitHub<sup>1</sup></a><a href="/tags/Hermes-Agent/" style="font-size: 1.05rem;">Hermes Agent<sup>1</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>2</sup></a><a href="/tags/Kubernetes/" style="font-size: 1.05rem;">Kubernetes<sup>1</sup></a><a href="/tags/Kuboard/" style="font-size: 1.05rem;">Kuboard<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>11</sup></a><a href="/tags/mihomo/" style="font-size: 1.05rem;">mihomo<sup>2</sup></a><a href="/tags/nginx/" style="font-size: 1.05rem;">nginx<sup>1</sup></a><a href="/tags/openclash/" style="font-size: 1.05rem;">openclash<sup>1</sup></a><a href="/tags/OpenClaw/" style="font-size: 1.05rem;">OpenClaw<sup>4</sup></a><a href="/tags/openwrt/" style="font-size: 1.05rem;">openwrt<sup>2</sup></a><a href="/tags/Rancher/" style="font-size: 1.05rem;">Rancher<sup>1</sup></a><a href="/tags/Shell/" style="font-size: 1.05rem;">Shell<sup>1</sup></a><a href="/tags/Telegram-Bot/" style="font-size: 1.05rem;">Telegram Bot<sup>3</sup></a><a href="/tags/VNC/" style="font-size: 1.05rem;">VNC<sup>1</sup></a><a href="/tags/Windows%E5%AE%89%E8%A3%85/" style="font-size: 1.05rem;">Windows安装<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 1.05rem;">云原生<sup>1</sup></a><a href="/tags/%E5%A4%A7%E9%BE%99%E8%99%BE%E7%83%AD/" style="font-size: 1.05rem;">大龙虾热<sup>1</sup></a><a href="/tags/%E5%B9%B3%E5%8F%B0%E6%95%B4%E5%90%88/" style="font-size: 1.05rem;">平台整合<sup>1</sup></a><a href="/tags/%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/" style="font-size: 1.05rem;">年终总结<sup>1</sup></a><a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" style="font-size: 1.05rem;">微服务<sup>1</sup></a><a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" style="font-size: 1.05rem;">数据库<sup>1</sup></a><a href="/tags/%E6%97%81%E8%B7%AF%E7%94%B1/" style="font-size: 1.05rem;">旁路由<sup>1</sup></a><a href="/tags/%E7%A7%91%E6%8A%80%E5%8E%86%E5%8F%B2/" style="font-size: 1.05rem;">科技历史<sup>2</sup></a><a href="/tags/%E8%87%AA%E5%8A%A8%E5%8C%96/" style="font-size: 1.05rem;">自动化<sup>1</sup></a><a href="/tags/%E8%BF%90%E7%BB%B4/" style="font-size: 1.05rem;">运维<sup>1</sup></a><a href="/tags/%E9%83%A8%E7%BD%B2%E6%95%99%E7%A8%8B/" style="font-size: 1.05rem;">部署教程<sup>3</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>歸檔</span><a class="card-more-btn" href="/archives/" title="檢視更多">
+    <i class="anzhiyufont anzhiyu-icon-angle-right"></i></a></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/10/"><span class="card-archive-list-date">十月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">4</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/08/"><span class="card-archive-list-date">八月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/05/"><span class="card-archive-list-date">五月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/04/"><span class="card-archive-list-date">四月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">4</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/03/"><span class="card-archive-list-date">三月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/02/"><span class="card-archive-list-date">二月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">6</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/01/"><span class="card-archive-list-date">一月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">5</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/12/"><span class="card-archive-list-date">十二月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E7%BB%B4/" itemprop="url">网络与运维</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/mihomo/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>mihomo</span></a><a class="article-meta__tags" href="/tags/clash/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>clash</span></a><a class="article-meta__tags" href="/tags/fake-ip/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>fake-ip</span></a><a class="article-meta__tags" href="/tags/tun/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>tun</span></a><a class="article-meta__tags" href="/tags/dns/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>dns</span></a><a class="article-meta__tags" href="/tags/%E4%BB%A3%E7%90%86%E5%88%86%E6%B5%81/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>代理分流</span></a></span></div></div><h1 class="post-title" itemprop="name headline">深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">發表於</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2026-10-16T09:30:00.000Z" title="發表於 2026-10-16 09:30:00">2026-10-16</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新於</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2026-10-16T09:30:00.000Z" title="更新於 2026-10-16 09:30:00">2026-10-16</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-wordcount"><i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" title="文章字数"></i><span class="post-meta-label" title="文章字数">字數總計:</span><span class="word-count" title="文章字数">6.2k</span><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" title="阅读时长"></i><span class="post-meta-label" title="阅读时长">閱讀時長:</span><span>24分鐘</span></span><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">閱讀量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为绵阳"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>绵阳</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="/images/clash-fake-ip/cover.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="https://home.34462958.xyz/2026/10/16/clash-fake-ip-tun-guide/"><header><a class="post-meta-categories" href="/categories/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E7%BB%B4/" itemprop="url">网络与运维</a><a href="/tags/mihomo/" tabindex="-1" itemprop="url">mihomo</a><a href="/tags/clash/" tabindex="-1" itemprop="url">clash</a><a href="/tags/fake-ip/" tabindex="-1" itemprop="url">fake-ip</a><a href="/tags/tun/" tabindex="-1" itemprop="url">tun</a><a href="/tags/dns/" tabindex="-1" itemprop="url">dns</a><a href="/tags/%E4%BB%A3%E7%90%86%E5%88%86%E6%B5%81/" tabindex="-1" itemprop="url">代理分流</a><h1 id="CrawlerTitle" itemprop="name headline">深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">kikock</span><time itemprop="dateCreated datePublished" datetime="2026-10-16T09:30:00.000Z" title="發表於 2026-10-16 09:30:00">2026-10-16</time><time itemprop="dateCreated datePublished" datetime="2026-10-16T09:30:00.000Z" title="更新於 2026-10-16 09:30:00">2026-10-16</time></header><h2 id="现象切入：一个令无数开发者困惑的排网谜团"><a href="#现象切入：一个令无数开发者困惑的排网谜团" class="headerlink" title="现象切入：一个令无数开发者困惑的排网谜团"></a>现象切入：一个令无数开发者困惑的排网谜团</h2><p>在配置好本地 Clash Verge Rev &#x2F; Mihomo 并开启内核 <strong>TUN 模式</strong>后，在终端执行以下网络诊断命令：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查询自定义域名解析</span></span><br><span class="line">nslookup <span class="number">870306666</span>.xyz</span><br><span class="line"><span class="comment"># 返回结果：</span></span><br><span class="line"><span class="comment"># Address: 198.18.1.144</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 尝试直接向公网阿里 DNS 查询</span></span><br><span class="line">nslookup <span class="number">870306666</span>.xyz <span class="number">223.5</span>.<span class="number">5.5</span></span><br><span class="line"><span class="comment"># 返回结果：</span></span><br><span class="line"><span class="comment"># DNS request timed out / Server failed</span></span><br></pre></td></tr></table></figure>
+
+<p>然而在浏览器中输入该网址，却能瞬间顺畅秒级渲染！<br>为什么 <code>nslookup</code> 拿到的是一个奇特的 <code>198.18.x.x</code> 地址？为什么指定阿里 DNS <code>223.5.5.5</code> 依然查不出来？真实的 IP（<code>182.136.15.18</code>）到底在什么时候由谁去查询的？DNS 泄露又是如何被根除的？</p>
+<p>本文将通过<strong>动态流转沙盒</strong>与<strong>原生 GUI 全景联动控制台</strong>，带你从 Windows 内核、TUN 网卡驱动、Clash 虚拟内存池到境外 VPS 出口，彻底拆解这套现代网络核心架构。</p>
+<hr>
+<h2 id="🚀-交互式数据流沙盒-支持「海外代理」与「国内直连」双场景模拟"><a href="#🚀-交互式数据流沙盒-支持「海外代理」与「国内直连」双场景模拟" class="headerlink" title="🚀 交互式数据流沙盒 (支持「海外代理」与「国内直连」双场景模拟)"></a>🚀 交互式数据流沙盒 (支持「海外代理」与「国内直连」双场景模拟)</h2><blockquote>
+<p><strong>操作提示</strong>：点击下方<strong>「🌍 海外模式」</strong>或<strong>「🇨🇳 国内模式」</strong>按钮切换场景，再点击<strong>「开始模拟」</strong>，即可动态见证 Fake-IP 在<strong>境外代理</strong>（本机 0 DNS 查询，海外 VPS 代查）与<strong>境内直连</strong>（延迟真实解析，握手时查国内 DoH）之间的本质分水岭：</p>
+</blockquote>
+
+<div style="background: rgba(17, 24, 39, 0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; margin: 24px 0 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 16px;">
+    <div>
+      <div style="font-size: 1.2rem; font-weight: 700; color: #f3f4f6; margin-bottom: 2px;">⚡ 端到端数据流转动态仿真 (双路由沙盒)</div>
+      <div style="color: #9ca3af; font-size: 0.85rem;">直观对比：海外代理 与 国内直连 在 Fake-IP 模式下的关键分水岭</div>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button id="btnModeOversea" onclick="switchHexoSimMode('oversea')" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">🌍 海外模式 (走代理)</button>
+      <button id="btnModeDomestic" onclick="switchHexoSimMode('domestic')" style="background: rgba(255,255,255,0.08); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); padding: 7px 14px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">🇨🇳 国内模式 (走直连)</button>
+    </div>
+  </div>
+
+  <!-- 输入与控制栏 -->
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 16px;">
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 600;">测试域名:</span>
+      <input type="text" id="hexoDomainInput" value="870306666.xyz" spellcheck="false" style="background: #0f172a; border: 1px solid rgba(56,189,248,0.4); color: #fff; padding: 6px 12px; border-radius: 6px; font-family: monospace; font-size: 0.9rem; outline: none; width: 200px;" />
+      <span id="hexoModeBadge" style="font-size: 0.76rem; padding: 3px 8px; border-radius: 4px; background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3);">分流策略: 走海外代理策略组</span>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button onclick="runHexoSim()" style="background: #10b981; color: #fff; border: none; padding: 7px 16px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">开始模拟</button>
+      <button onclick="resetHexoSim()" style="background: rgba(255,255,255,0.08); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); padding: 7px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">重置</button>
+    </div>
+  </div>
+
+  <!-- 5 节点流水线 -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 16px;">
+    <div id="hnode1" style="background:#0f172a; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 8px; text-align:center; transition: all 0.3s;">
+      <div class="hnum" style="width:20px; height:20px; border-radius:50%; background:rgba(255,255,255,0.1); color:#9ca3af; font-size:0.75rem; margin:0 auto 6px; display:flex; align-items:center; justify-content:center;">1</div>
+      <div style="font-size:0.85rem; font-weight:700; color:#fff;">应用发起解析</div>
+      <div style="font-size:0.72rem; color:#9ca3af; margin-top:4px;">getaddrinfo 发起 DNS</div>
+    </div>
+    <div id="hnode2" style="background:#0f172a; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 8px; text-align:center; transition: all 0.3s;">
+      <div class="hnum" style="width:20px; height:20px; border-radius:50%; background:rgba(255,255,255,0.1); color:#9ca3af; font-size:0.75rem; margin:0 auto 6px; display:flex; align-items:center; justify-content:center;">2</div>
+      <div style="font-size:0.85rem; font-weight:700; color:#fff;">Clash 分配假 IP</div>
+      <div style="font-size:0.72rem; color:#9ca3af; margin-top:4px;" id="hnode2Desc">0ms 秒回 198.18.1.144</div>
+    </div>
+    <div id="hnode3" style="background:#0f172a; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 8px; text-align:center; transition: all 0.3s;">
+      <div class="hnum" style="width:20px; height:20px; border-radius:50%; background:rgba(255,255,255,0.1); color:#9ca3af; font-size:0.75rem; margin:0 auto 6px; display:flex; align-items:center; justify-content:center;">3</div>
+      <div style="font-size:0.85rem; font-weight:700; color:#fff;">TUN 内核劫持</div>
+      <div style="font-size:0.72rem; color:#9ca3af; margin-top:4px;">向假 IP 建立 TCP 握手</div>
+    </div>
+    <div id="hnode4" style="background:#0f172a; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 8px; text-align:center; transition: all 0.3s;">
+      <div class="hnum" style="width:20px; height:20px; border-radius:50%; background:rgba(255,255,255,0.1); color:#9ca3af; font-size:0.75rem; margin:0 auto 6px; display:flex; align-items:center; justify-content:center;">4</div>
+      <div style="font-size:0.85rem; font-weight:700; color:#fff;">核心逆向查表</div>
+      <div style="font-size:0.72rem; color:#9ca3af; margin-top:4px;" id="hnode4Desc">假 IP 还原原始域名</div>
+    </div>
+    <div id="hnode5" style="background:#0f172a; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 8px; text-align:center; transition: all 0.3s;">
+      <div class="hnum" style="width:20px; height:20px; border-radius:50%; background:rgba(255,255,255,0.1); color:#9ca3af; font-size:0.75rem; margin:0 auto 6px; display:flex; align-items:center; justify-content:center;">5</div>
+      <div style="font-size:0.85rem; font-weight:700; color:#fff;" id="hnode5Title">海外 VPS 远端代查</div>
+      <div style="font-size:0.72rem; color:#9ca3af; margin-top:4px;" id="hnode5Desc">域名进加密隧道出海</div>
+    </div>
+  </div>
+
+  <!-- 动态终端日志输出 (自适应铺开，无滚动条) -->
+  <div id="hexoConsole" style="background:#090d16; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:16px 18px; font-family:monospace; font-size:0.84rem; min-height:175px; color:#a5f3fc; line-height:1.7; box-sizing:border-box;">
+    <div><span style="color:#6b7280;">[READY]</span> 系统仿真器就绪，当前为【海外模式】。点击右上角「开始模拟」或切换模式。</div>
+  </div>
+
+</div>
+
+<script>
+  let hSimTimer = null;
+  let currentSimMode = 'oversea';
+
+  function switchHexoSimMode(mode) {
+    currentSimMode = mode;
+    resetHexoSim();
+    const btnO = document.getElementById('btnModeOversea');
+    const btnD = document.getElementById('btnModeDomestic');
+    const input = document.getElementById('hexoDomainInput');
+    const badge = document.getElementById('hexoModeBadge');
+    const n5Title = document.getElementById('hnode5Title');
+    const n5Desc = document.getElementById('hnode5Desc');
+
+    if (mode === 'oversea') {
+      btnO.style.background = 'linear-gradient(135deg, #0284c7, #0369a1)';
+      btnO.style.color = '#fff';
+      btnO.style.border = 'none';
+
+      btnD.style.background = 'rgba(255,255,255,0.08)';
+      btnD.style.color = '#cbd5e1';
+      btnD.style.border = '1px solid rgba(255,255,255,0.1)';
+
+      input.value = '870306666.xyz';
+      badge.innerText = '分流策略: 走海外代理策略组';
+      badge.style.color = '#38bdf8';
+      badge.style.background = 'rgba(56,189,248,0.15)';
+      badge.style.borderColor = 'rgba(56,189,248,0.3)';
+
+      n5Title.innerText = '海外 VPS 远端代查';
+      n5Desc.innerText = '域名进加密隧道出海';
+      document.getElementById('hexoConsole').innerHTML = '<div><span style="color:#6b7280;">[READY]</span> 已切换至【海外模式】(如 870306666.xyz / google.com)。点击「开始模拟」观察 VPS 代查机制。</div>';
+    } else {
+      btnD.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+      btnD.style.color = '#fff';
+      btnD.style.border = 'none';
+
+      btnO.style.background = 'rgba(255,255,255,0.08)';
+      btnO.style.color = '#cbd5e1';
+      btnO.style.border = '1px solid rgba(255,255,255,0.1)';
+
+      input.value = 'baidu.com';
+      badge.innerText = '分流策略: geosite:cn -> DIRECT (直连)';
+      badge.style.color = '#34d399';
+      badge.style.background = 'rgba(16,185,129,0.15)';
+      badge.style.borderColor = 'rgba(16,185,129,0.3)';
+
+      n5Title.innerText = '国内 DoH 直连握手';
+      n5Desc.innerText = '握手瞬间查阿里 DoH 拿真 IP';
+      document.getElementById('hexoConsole').innerHTML = '<div><span style="color:#6b7280;">[READY]</span> 已切换至【国内模式】(如 baidu.com / bilibili.com)。点击「开始模拟」观察延迟真实解析机制。</div>';
+    }
+  }
+
+  function logHexo(tag, msg, color) {
+    const box = document.getElementById('hexoConsole');
+    const time = new Date().toLocaleTimeString();
+    const d = document.createElement('div');
+    d.innerHTML = `<span style="color:#6b7280;">[${time}]</span> <span style="color:#c084fc;">[${tag}]</span> <span style="color:${color};">${msg}</span>`;
+    box.appendChild(d);
+  }
+
+  function resetHexoSim() {
+    if (hSimTimer) clearTimeout(hSimTimer);
+    for (let i = 1; i <= 5; i++) {
+      const node = document.getElementById('hnode' + i);
+      node.style.borderColor = 'rgba(255,255,255,0.08)';
+      node.style.background = '#0f172a';
+      node.querySelector('.hnum').style.background = 'rgba(255,255,255,0.1)';
+      node.querySelector('.hnum').style.color = '#9ca3af';
+    }
+  }
+
+  function setHexoNode(idx, state) {
+    const node = document.getElementById('hnode' + idx);
+    const num = node.querySelector('.hnum');
+    if (state === 'active') {
+      node.style.borderColor = '#38bdf8';
+      node.style.background = 'rgba(56,189,248,0.15)';
+      num.style.background = '#38bdf8';
+      num.style.color = '#000';
+    } else if (state === 'passed') {
+      node.style.borderColor = '#10b981';
+      node.style.background = 'rgba(16,185,129,0.08)';
+      num.style.background = '#10b981';
+      num.style.color = '#fff';
+    }
+  }
+
+  function runHexoSim() {
+    resetHexoSim();
+    document.getElementById('hexoConsole').innerHTML = '';
+    const domain = document.getElementById('hexoDomainInput').value.trim() || (currentSimMode === 'oversea' ? '870306666.xyz' : 'baidu.com');
+    const fakeIp = currentSimMode === 'oversea' ? '198.18.1.144' : '198.18.2.88';
+
+    logHexo('INIT', `启动访问目标: ${domain} [当前场景: ${currentSimMode === 'oversea' ? '海外代理' : '国内直连'}]`, '#fbbf24');
+    setHexoNode(1, 'active');
+    logHexo('APP', `应用程序发起系统 DNS 查询 getaddrinfo("${domain}")`, '#38bdf8');
+    
+    hSimTimer = setTimeout(() => {
+      setHexoNode(1, 'passed');
+      setHexoNode(2, 'active');
+      logHexo('FAKE-IP', `Clash 拦截 UDP 53，本地内存池 0ms 闪电分配 Fake-IP: ${fakeIp}`, '#c084fc');
+      
+      hSimTimer = setTimeout(() => {
+        setHexoNode(2, 'passed');
+        setHexoNode(3, 'active');
+        logHexo('TUN', `应用信任该 IP，向 ${fakeIp}:443 发起 TCP SYN，TUN 网卡在 Windows 内核级抓取`, '#38bdf8');
+        
+        hSimTimer = setTimeout(() => {
+          setHexoNode(3, 'passed');
+          setHexoNode(4, 'active');
+          logHexo('CORE', `Clash 核心逆向查表：${fakeIp} 还原为原始域名 "${domain}"`, '#34d399');
+          
+          hSimTimer = setTimeout(() => {
+            setHexoNode(4, 'passed');
+            setHexoNode(5, 'passed');
+            if (currentSimMode === 'oversea') {
+              logHexo('RULE', `命中分流规则 -> 走【🌍海外代理策略组】`, '#38bdf8');
+              logHexo('OUTBOUND', `原始域名打包进 TLS 加密隧道发往境外 VPS，本机物理发包 0 个 DNS！`, '#c084fc');
+              logHexo('REMOTE', `海外 VPS 节点在当地出口完成无污染解析并建立连接，杜绝一切 DNS 泄露！🎉`, '#10b981');
+            } else {
+              logHexo('RULE', `命中分流规则 geosite:cn -> 走【DIRECT 直连】`, '#34d399');
+              logHexo('DOH', `延迟解析生效：Clash 在握手瞬间调用阿里安全 DoH (https://dns.alidns.com/dns-query)`, '#38bdf8');
+              logHexo('REAL-IP', `获取国内 CDN 真实公网 IP: 110.242.68.66 (中国 电信)，本地网卡直连建立！🇨🇳`, '#10b981');
+            }
+          }, 900);
+        }, 900);
+      }, 900);
+    }, 800);
+  }
+</script>
+
+
+<hr>
+<h2 id="一、为什么会有-Fake-IP？（解决什么根本痛点）"><a href="#一、为什么会有-Fake-IP？（解决什么根本痛点）" class="headerlink" title="一、为什么会有 Fake-IP？（解决什么根本痛点）"></a>一、为什么会有 Fake-IP？（解决什么根本痛点）</h2><p>在早期传统的代理客户端中，普遍采用的是 <strong>Redir-Host</strong> 模式：</p>
+<ol>
+<li><strong>致命的握手时延</strong>：浏览器想要访问 <code>google.com</code>，本地必须先通过公网发起一次真正的 DNS 解析。即便通过代理查远端 DNS，也必须先承担一个完整的跨国 RTT（200~400ms）才能拿到真实 IP 开始建立连接。</li>
+<li><strong>严重的 DNS 泄露与污染</strong>：如果向本地运营商发起解析，访问的目标网站明文瞬间在本地宽带被记录，并极易遭遇投毒阻断。</li>
+<li><strong>域名丢失</strong>：当应用程序拿到真实 IP 发出网络包后，网卡上只有四层目标 IP，原始域名丢失，代理软件只能吃力地依赖反向域名嗅探（Sniffing）。</li>
+</ol>
+<h3 id="Fake-IP-的颠覆性设计哲学：【假-IP-换真时效，延迟真实解析】"><a href="#Fake-IP-的颠覆性设计哲学：【假-IP-换真时效，延迟真实解析】" class="headerlink" title="Fake-IP 的颠覆性设计哲学：【假 IP 换真时效，延迟真实解析】"></a>Fake-IP 的颠覆性设计哲学：【假 IP 换真时效，延迟真实解析】</h3><ul>
+<li>Clash 在本机直接充当首选 DNS 服务器。</li>
+<li>任何应用来查 DNS 时，Clash <strong>根本不向公网发出任何查询包</strong>，而是直接从保留网段 <code>198.18.0.0/16</code> 抓取一个未占用的假 IP（如 <code>198.18.1.144</code>），并在本地内存构建映射字典：<br>$$\text{198.18.1.144} \longleftrightarrow \text{870306666.xyz}$$</li>
+<li>这一过程完全发生在本地内存中，<strong>耗时通常小于 0.5 毫秒</strong>！</li>
+</ul>
+<hr>
+<h2 id="二、端到端完整链路生命周期（TUN-模式实战）"><a href="#二、端到端完整链路生命周期（TUN-模式实战）" class="headerlink" title="二、端到端完整链路生命周期（TUN 模式实战）"></a>二、端到端完整链路生命周期（TUN 模式实战）</h2><blockquote>
+<p><strong>图表渲染说明</strong>：本节包含交互式动态时序图与 10 大核心流转阶段深度拆解。</p>
+</blockquote>
+
+<!-- Mermaid 矢量时序图容器 -->
+<div style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 14px; padding: 24px; margin: 24px 0; box-shadow: 0 15px 35px rgba(0,0,0,0.5);">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+    <div style="font-size: 1.05rem; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 8px;">
+      <span>📊 TUN + Fake-IP 全链路时序流转图</span>
+    </div>
+    <span style="font-size: 0.75rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(56,189,248,0.3);">Mermaid 矢量实时渲染</span>
+  </div>
+
+  <div class="mermaid" style="display: flex; justify-content: center; overflow-x: auto; min-height: 200px;">
+sequenceDiagram
+    autonumber
+    actor User as 用户程序 (如 Chrome)
+    participant Kernel as Windows 内核网络栈 / TUN 虚拟网卡
+    participant ClashDNS as Clash 内置 Fake-IP DNS 引擎
+    participant ClashCore as Clash 核心分流路由引擎
+    participant Remote as 目标服务器 / 远端 VPS 代理节点
+
+    User->>Kernel: 1. 解析 870306666.xyz
+    Kernel->>ClashDNS: 2. 劫持 DNS 查询 (UDP 53)
+    Note over ClashDNS: 本地内存池分配假 IP<br/>198.18.1.144 映射 870306666.xyz
+    ClashDNS-->>User: 3. 0ms 秒级返回 198.18.1.144
+
+    User->>Kernel: 4. 向 198.18.1.144:443 发起 TCP SYN
+    Kernel->>ClashCore: 5. TUN 驱动在内核级抓取该数据包送入 Clash
+    Note over ClashCore: 核心逆向查表还原！<br/>198.18.1.144 => 870306666.xyz
+
+    alt 规则判定走代理 (海外节点)
+        ClashCore->>Remote: 6a. 将原始域名直接打包进加密隧道发给海外 VPS
+        Remote->>Remote: 7a. 由海外 VPS 在当地出口发起真实无污染解析
+    else 规则判定走直连 (DIRECT)
+        ClashCore->>ClashCore: 6b. Clash 在握手瞬间调用国内 DoH 查询真实 IP (182.136.15.18)
+        ClashCore->>Remote: 7b. 本机物理网卡与真实 IP 直连握手
+    end
+
+    Remote-->>ClashCore: 8. 数据双向回传
+    ClashCore-->>Kernel: 9. 伪装回 198.18.1.144 的响应报文
+    Kernel-->>User: 10. 用户程序无缝收到网页内容
+  </div>
+</div>
+
+<!-- 自动加载 Mermaid 引擎脚本 (支持多源 CDN 备选，确保 100% 渲染成功) -->
+<script type="module">
+  async function initMermaid() {
+    try {
+      const mermaidModule = await import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs');
+      const mermaid = mermaidModule.default;
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        themeVariables: {
+          darkMode: true,
+          background: '#0f172a',
+          primaryColor: '#0284c7',
+          primaryTextColor: '#f8fafc',
+          primaryBorderColor: '#38bdf8',
+          lineColor: '#38bdf8',
+          secondaryColor: '#1e293b',
+          tertiaryColor: '#0f172a'
+        }
+      });
+      await mermaid.run({
+        querySelector: '.mermaid'
+      });
+    } catch (e) {
+      console.warn('Mermaid CDN 加载失败，启用备用 CDN:', e);
+      try {
+        const fallbackModule = await import('https://unpkg.com/mermaid@10/dist/mermaid.esm.min.mjs');
+        const mermaid = fallbackModule.default;
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+        await mermaid.run({ querySelector: '.mermaid' });
+      } catch(err) {
+        console.error('Mermaid 渲染失败:', err);
+      }
+    }
+  }
+  initMermaid();
+</script>
+
+
+<h3 id="📌-链路-10-大核心阶段技术解剖表"><a href="#📌-链路-10-大核心阶段技术解剖表" class="headerlink" title="📌 链路 10 大核心阶段技术解剖表"></a>📌 链路 10 大核心阶段技术解剖表</h3><table>
+<thead>
+<tr>
+<th align="left">阶段序号</th>
+<th align="left">发生位置</th>
+<th align="left">执行动作</th>
+<th align="left">关键技术机制</th>
+<th align="left">耗时&#x2F;网络开销</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>① 发起解析</strong></td>
+<td align="left">用户层 (浏览器)</td>
+<td align="left">调用系统 <code>getaddrinfo</code> 解析域名</td>
+<td align="left">浏览器按标准 Socket 逻辑查询本机配置的首选 DNS</td>
+<td align="left">极微</td>
+</tr>
+<tr>
+<td align="left"><strong>② 内核劫持</strong></td>
+<td align="left">Windows 内核</td>
+<td align="left">TUN 网卡驱动拦截系统发往 53 端口的 UDP 包</td>
+<td align="left">流量强制送入 Clash 内置 DNS 监听端口 (如 <code>:1053</code>)</td>
+<td align="left">&lt; 0.1ms</td>
+</tr>
+<tr>
+<td align="left"><strong>③ 分配假 IP</strong></td>
+<td align="left">Clash 内存表</td>
+<td align="left">发现不在黑名单中，秒级应答 <code>198.18.1.144</code></td>
+<td align="left"><strong>不发任何公网 DNS 包</strong>，在内存建立键值对 <code>198.18.1.144 ↔ 870306666.xyz</code></td>
+<td align="left"><strong>0ms (内存)</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>④ 应用连接</strong></td>
+<td align="left">操作系统网络栈</td>
+<td align="left">应用程序信任假 IP，向 <code>198.18.1.144:443</code> 发送 TCP SYN</td>
+<td align="left">假 IP 充当会话句柄（Token），应用以为连接正在建立</td>
+<td align="left">0ms</td>
+</tr>
+<tr>
+<td align="left"><strong>⑤ TUN 捕获</strong></td>
+<td align="left">TUN 驱动 &#x2F; Wintun</td>
+<td align="left">捕获所有 <code>198.18.0.0/16</code> 三层数据包并注入 Clash 核心</td>
+<td align="left">绕过 Windows 本地代理设置，捕获全局所有进程的流量</td>
+<td align="left">&lt; 0.2ms</td>
+</tr>
+<tr>
+<td align="left"><strong>⑥ 核心查表</strong></td>
+<td align="left">Clash 路由引擎</td>
+<td align="left">提取目标 IP <code>198.18.1.144</code>，反查内存表还原为原始域名</td>
+<td align="left">彻底解决真实四层流量域名丢失问题，恢复出原始字符串</td>
+<td align="left">0ms (哈希反查)</td>
+</tr>
+<tr>
+<td align="left"><strong>⑦a 代理出海</strong></td>
+<td align="left">海外 VPS 出口</td>
+<td align="left">原始域名打包进 Shadowsocks &#x2F; Trojan &#x2F; Hysteria2 密文包</td>
+<td align="left"><strong>由远端海外 VPS 在境外执行真实无污染 DNS 解析并建立连接</strong></td>
+<td align="left">1 RTT (跨国)</td>
+</tr>
+<tr>
+<td align="left"><strong>⑦b 直连握手</strong></td>
+<td align="left">本地物理网卡</td>
+<td align="left">若命中 <code>geosite:cn</code> 直连，握手瞬间查国内 DoH</td>
+<td align="left">获得国内真实 IP <code>182.136.15.18</code>，物理网卡直连国内服务器</td>
+<td align="left">1 RTT (国内)</td>
+</tr>
+<tr>
+<td align="left"><strong>⑧-⑩ 双向回传</strong></td>
+<td align="left">Clash 核心回传</td>
+<td align="left">远端服务器响应数据包经 Clash 核心解密后，伪装回传给应用</td>
+<td align="left">应用程序完全无感知，顺畅接收到真正的网页与数据</td>
+<td align="left">极速秒开</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="三、为什么-nslookup-会报错？"><a href="#三、为什么-nslookup-会报错？" class="headerlink" title="三、为什么 nslookup 会报错？"></a>三、为什么 <code>nslookup</code> 会报错？</h2><ol>
+<li><strong>TUN 驱动的全局劫持</strong>：开启 TUN 模式后，虚拟网卡抓取全机 <code>0.0.0.0/0</code> 的全部出站数据包。即使你显式指定 <code>nslookup 870306666.xyz 223.5.5.5</code>，该数据包也根本飞不出物理网卡，而是被 TUN 驱动塞进了 Clash。</li>
+<li><strong>标准应用 vs 专用诊断工具</strong>：<ul>
+<li>浏览器、curl、微信等调用的是标准系统 Socket API（<code>getaddrinfo</code>），拿到假 IP 后顺畅通过 TUN 与 Clash 完成还原；</li>
+<li><code>nslookup</code> 属于底层网络诊断工具，它跳过系统 API 自己构造原生 Raw DNS 报文，对报文头部的权威应答标志（AA&#x2F;RA Flags）有极其严苛的校验，遇到拦截代理环境容易因格式差异抛出 <code>Server failed</code>。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="四、Fake-IP-是如何彻底根治-DNS-泄露的？"><a href="#四、Fake-IP-是如何彻底根治-DNS-泄露的？" class="headerlink" title="四、Fake-IP 是如何彻底根治 DNS 泄露的？"></a>四、Fake-IP 是如何彻底根治 DNS 泄露的？</h2><p>很多用户常问：“我的本地宽带运营商能不能知道我访问了哪些境外网站？”<br>在 Fake-IP 模式下，DNS 泄露在物理逻辑上被彻底扼杀：</p>
+<ol>
+<li><strong>本地发包量为 0</strong>：在访问境外域名时，本地电脑根本没有向外界发送任何 DNS 数据包，运营商抓包结果为 0。</li>
+<li><strong>代理协议远端代查 (Remote DNS)<strong>：流量送入 Shadowsocks &#x2F; Trojan &#x2F; Hysteria2 &#x2F; TUIC 时，Clash 打包的是</strong>原始域名字符串</strong>（<code>DOMAINNAME</code>）。整个数据包通过 TLS 高强度加密飞向海外 VPS，由海外服务器在境外出口完成真实解析。</li>
+<li><strong>4 大防泄露黄金配置</strong>：<ul>
+<li><strong><code>no-resolve</code> 参数</strong>：在 IP 规则上加上 <code>GEOIP,LAN,DIRECT,no-resolve</code>，避免规则匹配时在本地提前触发真实解析；</li>
+<li>**<code>ipv6: false</code>**：坚决关闭 IPv6 解析，彻底堵死国内宽带运营商通过 IPv6 旁路窃取明文 DNS 的后门；</li>
+<li><strong><code>nameserver-policy</code> + DoH</strong>：国内直连域名走加密的 <code>https://dns.alidns.com/dns-query</code>，全程运行在 HTTPS 443 密文中，旁路无法窥探；</li>
+<li><strong>兜底规则走代理</strong>：配置末尾保持 <code>MATCH,🌍选择代理节点</code>，未命中域名的流量统一加密出海。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="五、终极解惑：真实-DNS-究竟在什么时候、由谁去查？"><a href="#五、终极解惑：真实-DNS-究竟在什么时候、由谁去查？" class="headerlink" title="五、终极解惑：真实 DNS 究竟在什么时候、由谁去查？"></a>五、终极解惑：真实 DNS 究竟在什么时候、由谁去查？</h2><table>
+<thead>
+<tr>
+<th align="left">访问目标类型</th>
+<th align="left">命中分流规则</th>
+<th align="left">真正查询 DNS 的时刻</th>
+<th align="left">由谁执行真正的查询？</th>
+<th align="left">本地运营商能否抓到明文？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>境外 &#x2F; 代理域名</strong></td>
+<td align="left">代理策略组</td>
+<td align="left"><strong>远端 VPS 收到代理包的瞬间</strong></td>
+<td align="left"><strong>海外 VPS 节点</strong>（本机完全不查）</td>
+<td align="left"><strong>完全无法探知</strong>（0 本地 DNS 流量）</td>
+</tr>
+<tr>
+<td align="left"><strong>境内 &#x2F; 直连域名</strong></td>
+<td align="left"><code>DIRECT</code></td>
+<td align="left"><strong>浏览器发起 TCP 握手的瞬间</strong></td>
+<td align="left"><strong>本地 Clash 内核</strong></td>
+<td align="left">仅看到向阿里&#x2F;腾讯 DoH 的 443 密文</td>
+</tr>
+<tr>
+<td align="left"><strong>带 no-resolve 的规则</strong></td>
+<td align="left"><code>GEOIP,LAN,DIRECT,no-resolve</code></td>
+<td align="left">不触发解析，直接按 IP 匹配</td>
+<td align="left"><strong>不查询</strong></td>
+<td align="left">无</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="🖼️-Clash-Verge-Rev-原生界面-GUI-与-底层-YAML-实时等高联动对比"><a href="#🖼️-Clash-Verge-Rev-原生界面-GUI-与-底层-YAML-实时等高联动对比" class="headerlink" title="🖼️ Clash Verge Rev 原生界面 (GUI) 与 底层 YAML 实时等高联动对比"></a>🖼️ Clash Verge Rev 原生界面 (GUI) 与 底层 YAML 实时等高联动对比</h2><blockquote>
+<p><strong>操作提示</strong>：左侧为 1:1 复刻的 Clash Verge Rev 原生长控制台，右侧为底层 YAML 代码。<strong>点击左侧长面板中的任意一个开关或输入框，右侧 YAML 代码将自动平滑滚动并高亮相应的配置字段</strong>，并浮现深度技术避坑指南：</p>
+</blockquote>
+
+<div style="background: rgba(17, 24, 39, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; margin: 28px 0; box-shadow: 0 20px 50px rgba(0,0,0,0.6); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 100%; box-sizing: border-box; overflow: hidden;">
+  
+  <div style="display: grid; grid-template-columns: minmax(280px, 400px) minmax(0, 1fr); gap: 18px; align-items: stretch; width: 100%; box-sizing: border-box;">
+    
+    <!-- 左侧高仿原生 GUI 卡片 (固定 700px 高度) -->
+    <div style="background: #ffffff; color: #1e293b; border-radius: 12px; padding: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); display: flex; flex-direction: column; height: 700px; box-sizing: border-box;">
+      
+      <!-- 顶部状态栏 -->
+      <div style="flex: 0 0 auto;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+          <div style="font-weight: 700; font-size: 1.15rem; color: #0f172a;">DNS 覆写</div>
+          <div style="display: flex; gap: 6px;">
+            <button style="background: #fff; border: 1px solid #f59e0b; color: #d97706; padding: 3px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: 600;">🔄 重置为默认值</button>
+            <button style="background: #0284c7; border: none; color: #fff; padding: 3px 12px; border-radius: 5px; font-size: 0.75rem; font-weight: 600;">高级</button>
+          </div>
+        </div>
+        <div style="background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 6px; padding: 6px 10px; margin-bottom: 8px; font-size: 0.72rem; color: #0369a1; line-height: 1.3;">
+          ℹ️ DNS 覆写开关按订阅独立保存，仅对对应订阅生效。
+        </div>
+        <p style="font-size: 0.72rem; color: #64748b; font-style: italic; margin-bottom: 10px;">如果你不清楚这里的设置请不要修改，并保持 DNS 覆写关闭</p>
+      </div>
+
+      <!-- 全景长内容区 -->
+      <div style="flex: 1 1 auto; overflow-y: auto; padding-right: 6px;" class="hexo-scroll">
+        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a; margin: 4px 0 6px; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px;">DNS 设置</div>
+        
+        <div class="h-gui-row" onclick="hlYaml('enable')"><span>启用 DNS</span><div class="h-switch on"><div class="h-dot"></div></div></div>
+        <div class="h-gui-row" onclick="hlYaml('listen')"><span>DNS 监听地址</span><input type="text" value=":53" readonly class="h-input-sm" /></div>
+        <div class="h-gui-row" onclick="hlYaml('enhanced-mode')"><span>增强模式</span><div class="h-select"><span>fake-ip</span><span>▼</span></div></div>
+        <div class="h-gui-row" onclick="hlYaml('fake-ip-range')"><span>Fake IP 范围</span><input type="text" value="198.18.0.1/16" readonly class="h-input-sm" /></div>
+        <div class="h-gui-row" onclick="hlYaml('fake-ip-range6')"><span>Fake IP 范围 (IPv6)</span><input type="text" value="fdfe:dcba:9876::1/64" readonly class="h-input-sm" style="width:130px; font-size:0.7rem;" /></div>
+        <div class="h-gui-row" onclick="hlYaml('fake-ip-filter-mode')"><span>Fake IP 过滤模式</span><div class="h-select"><span>blacklist</span><span>▼</span></div></div>
+        <div class="h-gui-row" onclick="hlYaml('ipv6')"><div><div>IPv6</div><div style="font-size:0.68rem; color:#94a3b8;">启用 IPv6 DNS 解析</div></div><div class="h-switch"><div class="h-dot"></div></div></div>
+        <div class="h-gui-row" onclick="hlYaml('prefer-h3')"><div><div>优先使用 HTTP/3</div><div style="font-size:0.68rem; color:#94a3b8;">DNS DOH 使用 HTTP/3 协议</div></div><div class="h-switch"><div class="h-dot"></div></div></div>
+        <div class="h-gui-row" onclick="hlYaml('respect-rules')"><div><div>遵循路由规则</div><div style="font-size:0.68rem; color:#94a3b8;">DNS 连接遵循路由规则</div></div><div class="h-switch on"><div class="h-dot"></div></div></div>
+        <div class="h-gui-row" onclick="hlYaml('use-hosts')"><div><div>使用 Hosts</div><div style="font-size:0.68rem; color:#94a3b8;">启用通过 hosts 文件解析域名</div></div><div class="h-switch on"><div class="h-dot"></div></div></div>
+        <div class="h-gui-row" onclick="hlYaml('use-system-hosts')"><div><div>使用系统 Hosts</div><div style="font-size:0.68rem; color:#94a3b8;">启用通过系统 hosts 文件解析域名</div></div><div class="h-switch"><div class="h-dot"></div></div></div>
+        <div class="h-gui-row" onclick="hlYaml('direct-nameserver-follow-policy')"><div><div>直连域名服务器遵循策略</div><div style="font-size:0.68rem; color:#94a3b8;">是否遵循 nameserver-policy 设置</div></div><div class="h-switch"><div class="h-dot"></div></div></div>
+
+        <div class="h-gui-col" onclick="hlYaml('default-nameserver')"><span class="h-label">默认域名服务器 (解析 DNS 服务器自身默认 DNS)</span><input type="text" readonly value="223.5.5.5, 119.29.29.29" class="h-input-full" /></div>
+        <div class="h-gui-col" onclick="hlYaml('nameserver')"><span class="h-label">域名服务器 (兜底 DNS 列表，用逗号分隔)</span><input type="text" readonly value="https://dns.google/dns-query, https://1.1.1.1/dns-query" class="h-input-full" /></div>
+        <div class="h-gui-col" onclick="hlYaml('fallback-servers')"><span class="h-label">回退服务器 (回退 DNS 服务器列表，用逗号分隔)</span><input type="text" readonly value="https://dns.alidns.com/dns-query, https://dns.google/dns-query" class="h-input-full" style="color:#94a3b8;" /></div>
+        <div class="h-gui-col" onclick="hlYaml('proxy-server-nameserver')"><span class="h-label">代理节点DNS (仅用于解析代理节点的域名，用逗号分隔)</span><textarea readonly class="h-textarea">223.5.5.5, 119.29.29.29, https://dns.alidns.com/dns-query, https://doh.pub/dns-query</textarea></div>
+        <div class="h-gui-col" onclick="hlYaml('direct-nameserver')"><span class="h-label">直连域名服务器 (直连出口域名解析，支持 system)</span><input type="text" readonly value="system, 223.6.6.6" class="h-input-full" style="color:#94a3b8;" /></div>
+        <div class="h-gui-col" onclick="hlYaml('fake-ip-filter')"><span class="h-label">Fake IP 过滤 (跳过 Fake IP 解析的域名)</span><textarea readonly class="h-textarea">*.lan, *.local, *.arpa, time.*.com, ntp.*.com, +.market.xiaomi.com, localhost.ptlogin2.qq.com, *.msftncsi.com, www.msftconnecttest.com</textarea></div>
+        <div class="h-gui-col" onclick="hlYaml('nameserver-policy')"><span class="h-label">域名服务器策略 (特定域名的 DNS 服务器，格式: domain=server1;server2)</span><textarea readonly class="h-textarea">geosite:private,cn=https://dns.alidns.com/dns-query;https://doh.pub/dns-query, geosite:geolocation-!cn=https://dns.google/dns-query;https://1.1.1.1/dns-query</textarea></div>
+
+        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a; margin: 14px 0 6px; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px;">回退过滤设置</div>
+        <div class="h-gui-row" onclick="hlYaml('fallback-geoip')"><div><div>GeoIP 过滤</div><div style="font-size:0.68rem; color:#94a3b8;">启用 GeoIP 回退过滤</div></div><div class="h-switch on"><div class="h-dot"></div></div></div>
+        <div class="h-gui-row" onclick="hlYaml('fallback-geoip-code')"><span>GeoIP 国家代码</span><input type="text" value="CN" readonly class="h-input-sm" style="width:60px;" /></div>
+        <div class="h-gui-col" onclick="hlYaml('fallback-ipcidr')"><span class="h-label">回退 IP CIDR (不使用回退服务器的 IP CIDR)</span><input type="text" readonly value="240.0.0.0/4, 0.0.0.0/32" class="h-input-full" /></div>
+        <div class="h-gui-col" onclick="hlYaml('fallback-domain')"><span class="h-label">回退域名 (使用回退服务器的域名)</span><input type="text" readonly value="+.google.com, +.facebook.com, +.youtube.com" class="h-input-full" /></div>
+
+        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a; margin: 14px 0 6px; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px;">Hosts 设置</div>
+        <div class="h-gui-col" onclick="hlYaml('hosts')"><span class="h-label">Hosts (自定义域名到 IP 或域名的映射)</span><textarea readonly class="h-textarea" style="color:#94a3b8;">*.clash.dev=127.0.0.1, alpha.clash.dev=::1, test.com=1.1.1.1;2.2.2.2</textarea></div>
+      </div>
+
+      <!-- 底部控制栏 -->
+      <div style="flex: 0 0 auto; display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+        <button style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 4px 14px; border-radius: 5px; font-size: 0.8rem;">取消</button>
+        <button style="background: #0284c7; border: none; color: #fff; padding: 4px 16px; border-radius: 5px; font-size: 0.8rem; font-weight: 600;">保存</button>
+      </div>
+
+    </div>
+
+    <!-- 右侧 YAML 联动区域 (等高齐平 700px，min-width: 0 彻底解决宽幅溢出) -->
+    <div style="display: flex; flex-direction: column; height: 700px; box-sizing: border-box; min-width: 0; width: 100%;">
+      
+      <!-- 动态提示窗 -->
+      <div id="hExpBox" style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; flex: 0 0 auto;">
+        <div style="color: #38bdf8; font-weight: 700; font-size: 0.92rem; margin-bottom: 4px;" id="hExpTitle">💡 当前聚焦：enhanced-mode: "fake-ip"</div>
+        <div style="color: #9ca3af; font-size: 0.82rem; line-height: 1.5;" id="hExpDesc">
+          DNS 核心模式。开启后本地不再向公网发送查询包，0ms 响应 198.18.x.x 假 IP，推迟真实查询，消灭 DNS 泄露并提速。
+        </div>
+      </div>
+
+      <!-- YAML 代码镜面 (撑满剩余高度) -->
+      <div style="background: #090d16; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px; font-family: monospace; font-size: 0.82rem; overflow-y: auto; flex: 1 1 auto; color: #f3f4f6;" class="hexo-scroll">
+        <pre style="margin:0; white-space: pre; overflow-x: auto;"><code id="hYamlCode">dns:
+  <span style="color:#64748b;"># 1. 启用 DNS 模块</span>
+  <span id="hl-enable" class="hy-line">enable: true</span>
+
+  <span style="color:#64748b;"># 2. DNS 监听端口 (推荐 0.0.0.0:1053)</span>
+  <span id="hl-listen" class="hy-line">listen: ':53'</span>
+
+  <span style="color:#64748b;"># 3. 增强模式 (fake-ip 核心)</span>
+  <span id="hl-enhanced-mode" class="hy-line" style="background:rgba(56,189,248,0.25); color:#fff;">enhanced-mode: 'fake-ip'</span>
+
+  <span style="color:#64748b;"># 4. Fake IP 假 IP 池网段 (RFC 2544)</span>
+  <span id="hl-fake-ip-range" class="hy-line">fake-ip-range: '198.18.0.1/16'</span>
+
+  <span style="color:#64748b;"># 5. IPv6 假 IP 范围</span>
+  <span id="hl-fake-ip-range6" class="hy-line">fake-ip-range6: 'fdfe:dcba:9876::1/64'</span>
+
+  <span style="color:#64748b;"># 6. Fake IP 过滤模式</span>
+  <span id="hl-fake-ip-filter-mode" class="hy-line">fake-ip-filter-mode: 'blacklist'</span>
+
+  <span style="color:#64748b;"># 7. IPv6 解析 (防泄露，坚决关闭)</span>
+  <span id="hl-ipv6" class="hy-line">ipv6: false</span>
+
+  <span style="color:#64748b;"># 8. 优先使用 HTTP/3 (建议关闭防 UDP 干扰)</span>
+  <span id="hl-prefer-h3" class="hy-line">prefer-h3: false</span>
+
+  <span style="color:#64748b;"># 9. 遵循分流路由规则</span>
+  <span id="hl-respect-rules" class="hy-line">respect-rules: true</span>
+
+  <span style="color:#64748b;"># 10. 使用 Hosts</span>
+  <span id="hl-use-hosts" class="hy-line">use-hosts: true</span>
+
+  <span style="color:#64748b;"># 11. 忽略系统 hosts (防系统旧映射污染)</span>
+  <span id="hl-use-system-hosts" class="hy-line">use-system-hosts: false</span>
+
+  <span style="color:#64748b;"># 12. 直连域名服务器遵循策略</span>
+  <span id="hl-direct-nameserver-follow-policy" class="hy-line">direct-nameserver-follow-policy: false</span>
+
+  <span style="color:#64748b;"># 13. 默认域名服务器 (解析 DoH 域名自身)</span>
+  <span id="hl-default-nameserver" class="hy-line">default-nameserver:
+    - '223.5.5.5'
+    - '119.29.29.29'</span>
+
+  <span style="color:#64748b;"># 14. 域名服务器 (兜底通用 DNS)</span>
+  <span id="hl-nameserver" class="hy-line">nameserver:
+    - 'https://dns.google/dns-query'
+    - 'https://1.1.1.1/dns-query'</span>
+
+  <span style="color:#64748b;"># 15. 代理节点专用解析 DNS (拉取节点核心保障)</span>
+  <span id="hl-proxy-server-nameserver" class="hy-line">proxy-server-nameserver:
+    - '223.5.5.5'
+    - '119.29.29.29'
+    - 'https://dns.alidns.com/dns-query'
+    - 'https://doh.pub/dns-query'</span>
+
+  <span style="color:#64748b;"># 16. 直连专用域名服务器</span>
+  <span id="hl-direct-nameserver" class="hy-line">direct-nameserver: []</span>
+
+  <span style="color:#64748b;"># 17. 回退服务器</span>
+  <span id="hl-fallback-servers" class="hy-line">fallback: []</span>
+
+  <span style="color:#64748b;"># 18. Fake IP 过滤白名单 (直连解析真实 IP)</span>
+  <span id="hl-fake-ip-filter" class="hy-line">fake-ip-filter:
+    - '*.lan'
+    - '*.local'
+    - '*.arpa'
+    - 'time.*.com'
+    - 'ntp.*.com'
+    - '+.market.xiaomi.com'
+    - 'localhost.ptlogin2.qq.com'
+    - '*.msftncsi.com'
+    - 'www.msftconnecttest.com'</span>
+
+  <span style="color:#64748b;"># 19. 域名服务器策略 (DoH 内外智能分流)</span>
+  <span id="hl-nameserver-policy" class="hy-line">nameserver-policy:
+    geosite:private,cn:
+      - 'https://dns.alidns.com/dns-query'
+      - 'https://doh.pub/dns-query'
+    geosite:geolocation-!cn:
+      - 'https://dns.google/dns-query'
+      - 'https://1.1.1.1/dns-query'</span>
+
+  <span style="color:#64748b;"># 20. GeoIP 与回退过滤设置</span>
+  <span id="hl-fallback-filter" class="hy-line">fallback-filter:
+    <span id="hl-fallback-geoip">geoip: true</span>
+    <span id="hl-fallback-geoip-code">geoip-code: 'CN'</span>
+    <span id="hl-fallback-ipcidr">ipcidr:
+      - '240.0.0.0/4'
+      - '0.0.0.0/32'</span>
+    <span id="hl-fallback-domain">domain:
+      - '+.google.com'
+      - '+.facebook.com'
+      - '+.youtube.com'</span></span>
+
+<span style="color:#64748b;"># 24. 自定义 Hosts 静态映射表</span>
+<span id="hl-hosts" class="hy-line">hosts: &#123;&#125;</span></code></pre>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<style>
+  .h-gui-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 7px 6px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #334155;
+  }
+  .h-gui-row:hover, .h-gui-col:hover { background: #f8fafc; }
+  .h-gui-col { padding: 6px; border-radius: 5px; cursor: pointer; margin-top: 4px; }
+  .h-label { font-size: 0.78rem; font-weight: 600; color: #334155; display: block; margin-bottom: 3px; }
+  .h-switch { width: 36px; height: 20px; background: #cbd5e1; border-radius: 10px; position: relative; }
+  .h-switch.on { background: #0ea5e9; }
+  .h-dot { width: 16px; height: 16px; background: #fff; border-radius: 50%; position: absolute; left: 2px; top: 2px; transition: transform 0.2s; }
+  .h-switch.on .h-dot { transform: translateX(16px); }
+  .h-input-sm { width: 110px; text-align: center; border: 1px solid #cbd5e1; border-radius: 5px; padding: 2px 6px; font-size: 0.78rem; font-family: monospace; background: #f8fafc; color: #0f172a; }
+  .h-input-full { width: 100%; border: 1px solid #cbd5e1; border-radius: 5px; padding: 4px 6px; font-size: 0.75rem; font-family: monospace; background: #f8fafc; color: #0f172a; box-sizing: border-box; }
+  .h-select { width: 110px; border: 1px solid #cbd5e1; border-radius: 5px; padding: 2px 6px; font-size: 0.78rem; background: #f8fafc; color: #0f172a; display: flex; justify-content: space-between; align-items: center; }
+  .h-textarea { width: 100%; height: 50px; border: 1px solid #cbd5e1; border-radius: 5px; padding: 4px 6px; font-size: 0.72rem; font-family: monospace; background: #f8fafc; color: #0f172a; resize: none; box-sizing: border-box; }
+  .hy-line { display: inline-block; width: 100%; box-sizing: border-box; padding: 2px 4px; border-radius: 4px; transition: background 0.2s, color 0.2s; }
+  .hexo-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+  .hexo-scroll::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 3px; }
+</style>
+
+<script>
+  const hMeta = {
+    'enable': { title: '💡 1. 对应底层：dns.enable: true', desc: '控制是否启动内置 DNS 解析模块。开启 TUN 模式时必须置为 true，否则无法实现假 IP 劫持。' },
+    'listen': { title: '💡 2. 对应底层：dns.listen: ":53"', desc: '指定 DNS 监听端口。在 Windows 下建议配置为 0.0.0.0:1053，TUN 驱动会自动将 53 端口重定向进去，避免与系统 ICS 共享冲突。' },
+    'enhanced-mode': { title: '💡 3. 对应底层：dns.enhanced-mode: "fake-ip"', desc: '核心模式。本地不发公网 DNS，秒回 198.18.x.x 假 IP，消除污染与泄露，提速 200~500ms。' },
+    'fake-ip-range': { title: '💡 4. 对应底层：dns.fake-ip-range: "198.18.0.1/16"', desc: 'IETF RFC 2544 专用的性能测试保留网段，提供 6.5 万个假 IP 空间，公网永远不冲突。' },
+    'fake-ip-range6': { title: '💡 5. 对应底层：dns.fake-ip-range6: "fdfe:.../64"', desc: 'IPv6 假 IP 地址池。在已关闭 IPv6 解析的情况下，该项处于休眠状态。' },
+    'fake-ip-filter-mode': { title: '💡 6. 对应底层：dns.fake-ip-filter-mode: "blacklist"', desc: '黑名单机制。出现在 fake-ip-filter 列表里的域名强制解析真实 IP。' },
+    'ipv6': { title: '💡 7. 对应底层：dns.ipv6: false', desc: '【强烈建议保持关闭】杜绝电脑通过宽带运营商 IPv6 旁路发生明文 DNS 泄露的最关键防线。' },
+    'prefer-h3': { title: '💡 8. 对应底层：dns.prefer-h3: false', desc: '国内部分运营商对 UDP 443 干扰丢包严重，建议保持关闭（走稳定的 HTTP/2 TLS）。' },
+    'respect-rules': { title: '💡 9. 对应底层：dns.respect-rules: true', desc: '让 DNS 请求自身也遵循节点分流，防止境外 DoH 解析因迷路而超时。' },
+    'use-hosts': { title: '💡 10. 对应底层：dns.use-hosts: true', desc: '允许命中配置文件中的自定义 hosts 映射表。' },
+    'use-system-hosts': { title: '💡 11. 对应底层：dns.use-system-hosts: false', desc: '关闭可避免 Windows 操作系统自身的 hosts 文件对代理分流造成未知污染。' },
+    'fake-ip-filter': { title: '💡 12. 对应底层：dns.fake-ip-filter: [...]', desc: '白名单机制：凡在此列表中的域名强制查询真实 IP。建议加入微软测活域名防止感叹号。' },
+    'nameserver-policy': { title: '💡 13. 对应底层：dns.nameserver-policy: {...}', desc: '核心分流策略！境内域名走阿里/腾讯 DoH，海外未匹配走 Google/Cloudflare DoH。' },
+    'direct-nameserver-follow-policy': { title: '💡 14. 对应底层：direct-nameserver-follow-policy: false', desc: '控制直连出口是否强制遵循 nameserver-policy，保持 false 保证直连高效。' },
+    'default-nameserver': { title: '💡 15. 对应底层：dns.default-nameserver: [...]', desc: '纯 IP 服务器（如 223.5.5.5），在代理未建立时专门用于解析 DoH 域名自身 IP。' },
+    'nameserver': { title: '💡 16. 对应底层：dns.nameserver: [...]', desc: '兜底通用上游 DNS 列表。' },
+    'fallback-geoip': { title: '💡 17. 对应底层：fallback-filter.geoip: true', desc: '启用 GeoIP 回退过滤校验。在 Fake-IP 模式下主要靠 GEOSITE 分流。' },
+    'fallback-geoip-code': { title: '💡 18. 对应底层：fallback-filter.geoip-code: "CN"', desc: 'GeoIP 判断国家代码，用于判断是否为境内 IP。' },
+    'fallback-ipcidr': { title: '💡 19. 对应底层：fallback-filter.ipcidr: [...]', desc: '过滤运营商恶意劫持的黑洞 IP 段（如 240.0.0.0/4、0.0.0.0/32）。' },
+    'fallback-domain': { title: '💡 20. 对应底层：fallback-filter.domain: [...]', desc: '强制让这些特征域名走回退服务器解析。' },
+    'proxy-server-nameserver': { title: '💡 21. 对应底层：dns.proxy-server-nameserver: [...]', desc: '【自建节点生命线】专门用于解析海外 VPS 订阅源域名，代理未连接时也能拉取节点。' },
+    'fallback-servers': { title: '💡 22. 对应底层：dns.fallback: []', desc: '回退服务器列表，Fake-IP 模式下留空即可。' },
+    'direct-nameserver': { title: '💡 23. 对应底层：dns.direct-nameserver: []', desc: '直连专用域名服务器，留空时采用系统默认。' },
+    'hosts': { title: '💡 24. 对应底层：hosts: {...}', desc: '自定义静态 hosts 映射表。日常使用保持为空即可。' }
+  };
+
+  function hlYaml(k) {
+    const meta = hMeta[k];
+    if (!meta) return;
+    document.getElementById('hExpTitle').innerText = meta.title;
+    document.getElementById('hExpDesc').innerText = meta.desc;
+
+    document.querySelectorAll('.hy-line').forEach(el => {
+      el.style.background = 'transparent';
+      el.style.color = 'inherit';
+    });
+
+    const target = document.getElementById('hl-' + k);
+    if (target) {
+      target.style.background = 'rgba(56, 189, 248, 0.35)';
+      target.style.color = '#fff';
+      target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+</script>
+
+
+<hr>
+<h2 id="六、24-项核心参数深度对照速查表"><a href="#六、24-项核心参数深度对照速查表" class="headerlink" title="六、24 项核心参数深度对照速查表"></a>六、24 项核心参数深度对照速查表</h2><table>
+<thead>
+<tr>
+<th align="left">板块</th>
+<th align="left">界面控件名称 (来自图片)</th>
+<th align="left">客户端长图状态</th>
+<th align="left">生产配置文件对应行</th>
+<th align="left">状态评估与架构建议</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>基础设置</strong></td>
+<td align="left">启用 DNS</td>
+<td align="left">🔵 开启</td>
+<td align="left"><code>enable: true</code> (L29)</td>
+<td align="left"><span style="color:#10b981;">完全一致</span></td>
+</tr>
+<tr>
+<td align="left"><strong>基础设置</strong></td>
+<td align="left">DNS 监听地址</td>
+<td align="left"><code>:53</code></td>
+<td align="left"><code>listen: &quot;0.0.0.0:1053&quot;</code> (L30)</td>
+<td align="left"><span style="color:#f59e0b;">推荐保持 1053</span>（避开 53 端口冲突）</td>
+</tr>
+<tr>
+<td align="left"><strong>基础设置</strong></td>
+<td align="left">增强模式</td>
+<td align="left"><code>fake-ip</code></td>
+<td align="left"><code>enhanced-mode: &quot;fake-ip&quot;</code> (L36)</td>
+<td align="left"><span style="color:#10b981;">完全一致</span></td>
+</tr>
+<tr>
+<td align="left"><strong>基础设置</strong></td>
+<td align="left">Fake IP 范围</td>
+<td align="left"><code>198.18.0.1/16</code></td>
+<td align="left"><code>fake-ip-range: &quot;198.18.0.1/16&quot;</code> (L37)</td>
+<td align="left"><span style="color:#10b981;">完全一致</span></td>
+</tr>
+<tr>
+<td align="left"><strong>基础设置</strong></td>
+<td align="left">Fake IP 范围 (IPv6)</td>
+<td align="left"><code>fdfe:dcba:.../64</code></td>
+<td align="left"><em>未配置 (缺省)</em></td>
+<td align="left">因关闭 IPv6 不生效，无需配置</td>
+</tr>
+<tr>
+<td align="left"><strong>基础设置</strong></td>
+<td align="left">Fake IP 过滤模式</td>
+<td align="left"><code>blacklist</code></td>
+<td align="left"><em>未显式配置 (内核默认 blacklist)</em></td>
+<td align="left"><span style="color:#10b981;">实际等效</span></td>
+</tr>
+<tr>
+<td align="left"><strong>基础设置</strong></td>
+<td align="left">IPv6 解析开关</td>
+<td align="left">⚪ 关闭</td>
+<td align="left"><code>ipv6: false</code> (L31)</td>
+<td align="left"><span style="color:#10b981;">坚决保持关闭</span>（防泄露关键）</td>
+</tr>
+<tr>
+<td align="left"><strong>基础设置</strong></td>
+<td align="left">优先使用 HTTP&#x2F;3</td>
+<td align="left">⚪ 关闭</td>
+<td align="left"><code>prefer-h3: false</code> (L32)</td>
+<td align="left"><span style="color:#10b981;">完全一致</span>（防 UDP 443 丢包）</td>
+</tr>
+<tr>
+<td align="left"><strong>基础设置</strong></td>
+<td align="left">遵循路由规则</td>
+<td align="left">🔵 开启</td>
+<td align="left"><code>respect-rules: true</code> (L33)</td>
+<td align="left"><span style="color:#10b981;">完全一致</span></td>
+</tr>
+<tr>
+<td align="left"><strong>基础设置</strong></td>
+<td align="left">使用 Hosts</td>
+<td align="left">🔵 开启</td>
+<td align="left"><em>未显式配置 (默认 true)</em></td>
+<td align="left"><span style="color:#10b981;">完全一致</span></td>
+</tr>
+<tr>
+<td align="left"><strong>基础设置</strong></td>
+<td align="left">使用系统 Hosts</td>
+<td align="left">⚪ 关闭</td>
+<td align="left"><code>use-system-hosts: false</code> (L34)</td>
+<td align="left"><span style="color:#10b981;">完全一致</span>（防系统旧 hosts 污染）</td>
+</tr>
+<tr>
+<td align="left"><strong>域名分流</strong></td>
+<td align="left">Fake IP 过滤</td>
+<td align="left">常规列表</td>
+<td align="left"><code>fake-ip-filter: [...]</code> (L38-L50)</td>
+<td align="left"><span style="color:#38bdf8;">生产配置更优</span>（防 Windows 感叹号）</td>
+</tr>
+<tr>
+<td align="left"><strong>域名分流</strong></td>
+<td align="left">域名服务器策略</td>
+<td align="left">内外 DoH 分流</td>
+<td align="left"><code>nameserver-policy: ...</code> (L62-L68)</td>
+<td align="left"><span style="color:#10b981;">完全一致</span></td>
+</tr>
+<tr>
+<td align="left"><strong>域名分流</strong></td>
+<td align="left">直连遵循策略</td>
+<td align="left">⚪ 关闭</td>
+<td align="left"><em>未配置 (默认 false)</em></td>
+<td align="left">无需配置</td>
+</tr>
+<tr>
+<td align="left"><strong>域名分流</strong></td>
+<td align="left">默认域名服务器</td>
+<td align="left">223.5.5.5, 119.29.29.29</td>
+<td align="left"><code>default-nameserver: [...]</code> (L51-L53)</td>
+<td align="left"><span style="color:#10b981;">完全一致</span></td>
+</tr>
+<tr>
+<td align="left"><strong>域名分流</strong></td>
+<td align="left">域名服务器</td>
+<td align="left">Google &#x2F; CF DoH</td>
+<td align="left"><code>nameserver: [...]</code> (L54-L56)</td>
+<td align="left"><span style="color:#10b981;">完全一致</span></td>
+</tr>
+<tr>
+<td align="left"><strong>回退与代理</strong></td>
+<td align="left">GeoIP 过滤</td>
+<td align="left">🔵 开启</td>
+<td align="left"><em>未配置 (Fake-IP 下不依赖)</em></td>
+<td align="left">由 GEOSITE 精准分流代替</td>
+</tr>
+<tr>
+<td align="left"><strong>回退与代理</strong></td>
+<td align="left">GeoIP 国家代码</td>
+<td align="left"><code>CN</code></td>
+<td align="left"><em>未配置</em></td>
+<td align="left">由 GEOSITE 分流代替</td>
+</tr>
+<tr>
+<td align="left"><strong>回退与代理</strong></td>
+<td align="left">回退 IP CIDR</td>
+<td align="left">240.0.0.0&#x2F;4 等</td>
+<td align="left"><em>未配置</em></td>
+<td align="left">由 GEOSITE 分流代替</td>
+</tr>
+<tr>
+<td align="left"><strong>回退与代理</strong></td>
+<td align="left">回退域名</td>
+<td align="left">Google, FB 等</td>
+<td align="left"><em>未配置</em></td>
+<td align="left">由规则库直接命中，更精确</td>
+</tr>
+<tr>
+<td align="left"><strong>回退与代理</strong></td>
+<td align="left">回退服务器</td>
+<td align="left">(留空)</td>
+<td align="left"><em>未配置</em></td>
+<td align="left">均保持留空</td>
+</tr>
+<tr>
+<td align="left"><strong>回退与代理</strong></td>
+<td align="left">代理节点 DNS</td>
+<td align="left">223.5.5.5, 阿里&#x2F;腾讯 DoH</td>
+<td align="left"><code>proxy-server-nameserver: [...]</code> (L57)</td>
+<td align="left"><span style="color:#10b981;">完全一致</span>（拉取节点核心保障）</td>
+</tr>
+<tr>
+<td align="left"><strong>回退与代理</strong></td>
+<td align="left">直连域名服务器</td>
+<td align="left">(留空)</td>
+<td align="left"><em>未配置</em></td>
+<td align="left">均保持留空</td>
+</tr>
+<tr>
+<td align="left"><strong>Hosts</strong></td>
+<td align="left">Hosts 映射</td>
+<td align="left">示例占位符</td>
+<td align="left"><code>hosts: &#123;&#125;</code></td>
+<td align="left"><span style="color:#10b981;">完全一致</span>（日常留空）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="七、总结与最佳实践"><a href="#七、总结与最佳实践" class="headerlink" title="七、总结与最佳实践"></a>七、总结与最佳实践</h2><ol>
+<li><strong>认准真假 IP</strong>：在开启 Fake-IP 后，<code>nslookup</code> 查到 <code>198.18.x.x</code> 是完全符合协议设计的正常行为，不需要惊慌。</li>
+<li>**切勿在 Windows 强行监听 <code>:53</code>**：在 TUN 模式下，将监听端口改为 <code>1053</code>，依靠 TUN 驱动从内核层转发，是兼顾稳定性与权限的最优实践。</li>
+<li><strong>保持 DNS 覆写关闭</strong>：如客户端长图顶部提示所言，直接以维护良好的订阅 YAML 文件为准运行，既能保证节点订阅动态更新，又不会产生未知的配置覆盖冲突。</li>
+</ol>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/img/avatar.png" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/img/avatar.png" title="头像" alt="头像"></a><div class="post-copyright__author_name">kikock</div><div class="post-copyright__author_desc"></div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="https://home.34462958.xyz/2026/10/16/clash-fake-ip-tun-guide/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('https://home.34462958.xyz/2026/10/16/clash-fake-ip-tun-guide/')">深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"></div><div class="shareRight"></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特別聲明外，均採用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 許可協議。轉載請註明來自 <a href="https://home.34462958.xyz" target="_blank">不抽烟的🐇</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__category-list"><a class="post-meta__box__categoryes" href="/categories/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E7%BB%B4/"><span class="categoryes-punctuation"> <i class="anzhiyufont anzhiyu-icon-inbox"></i></span>网络与运维<span class="categoryesPageCount">2</span></a></div><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/mihomo/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>mihomo<span class="tagsPageCount">2</span></a><a class="post-meta__box__tags" href="/tags/clash/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>clash<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/fake-ip/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>fake-ip<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/tun/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>tun<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/dns/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>dns<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/%E4%BB%A3%E7%90%86%E5%88%86%E6%B5%81/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>代理分流<span class="tagsPageCount">1</span></a></div></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2026/10/14/iOS-Shadowrocket-WLOC-Location-Mock-Guide/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/images/ios-wloc-location-mock-cover.jpg" onerror="onerror=null;src='/img/404.webp'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">iOS 免越狱位置修改实战指南：基于 Shadowrocket 与 WLOC 模块</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>相關推薦</span></div><div class="relatedPosts-list"><div><a href="/2026/10/01/OpenWrt%E5%85%BB%E8%80%81%E6%97%81%E8%B7%AF%E7%94%B1%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B(%E5%9F%BA%E4%BA%8EOpenClash%E4%B8%8EMihomo%E5%86%85%E6%A0%B8)/" title="OpenWrt养老旁路由从零开始(基于OpenClash与Mihomo内核)"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://api.btstu.cn/sjbz/?lx=dongman&_r_=0061fc57-6d68-3ff6-61fd-45e7e5211875" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2026-10-01</div><div class="title">OpenWrt养老旁路由从零开始(基于OpenClash与Mihomo内核)</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/img/statusImg.png" alt="status"/></div></div><div class="author-info__description">疑難問題，玄學解釋大師。</div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">kikock</h1><div class="author-info__desc"></div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kikock" target="_blank" title="Github"><i class="anzhiyufont anzhiyu-icon-github"></i></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目錄</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%B0%E8%B1%A1%E5%88%87%E5%85%A5%EF%BC%9A%E4%B8%80%E4%B8%AA%E4%BB%A4%E6%97%A0%E6%95%B0%E5%BC%80%E5%8F%91%E8%80%85%E5%9B%B0%E6%83%91%E7%9A%84%E6%8E%92%E7%BD%91%E8%B0%9C%E5%9B%A2"><span class="toc-number">1.</span> <span class="toc-text">现象切入：一个令无数开发者困惑的排网谜团</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%9A%80-%E4%BA%A4%E4%BA%92%E5%BC%8F%E6%95%B0%E6%8D%AE%E6%B5%81%E6%B2%99%E7%9B%92-%E6%94%AF%E6%8C%81%E3%80%8C%E6%B5%B7%E5%A4%96%E4%BB%A3%E7%90%86%E3%80%8D%E4%B8%8E%E3%80%8C%E5%9B%BD%E5%86%85%E7%9B%B4%E8%BF%9E%E3%80%8D%E5%8F%8C%E5%9C%BA%E6%99%AF%E6%A8%A1%E6%8B%9F"><span class="toc-number">2.</span> <span class="toc-text">🚀 交互式数据流沙盒 (支持「海外代理」与「国内直连」双场景模拟)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E6%9C%89-Fake-IP%EF%BC%9F%EF%BC%88%E8%A7%A3%E5%86%B3%E4%BB%80%E4%B9%88%E6%A0%B9%E6%9C%AC%E7%97%9B%E7%82%B9%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">一、为什么会有 Fake-IP？（解决什么根本痛点）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Fake-IP-%E7%9A%84%E9%A2%A0%E8%A6%86%E6%80%A7%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6%EF%BC%9A%E3%80%90%E5%81%87-IP-%E6%8D%A2%E7%9C%9F%E6%97%B6%E6%95%88%EF%BC%8C%E5%BB%B6%E8%BF%9F%E7%9C%9F%E5%AE%9E%E8%A7%A3%E6%9E%90%E3%80%91"><span class="toc-number">3.1.</span> <span class="toc-text">Fake-IP 的颠覆性设计哲学：【假 IP 换真时效，延迟真实解析】</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%AB%AF%E5%88%B0%E7%AB%AF%E5%AE%8C%E6%95%B4%E9%93%BE%E8%B7%AF%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%EF%BC%88TUN-%E6%A8%A1%E5%BC%8F%E5%AE%9E%E6%88%98%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">二、端到端完整链路生命周期（TUN 模式实战）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%F0%9F%93%8C-%E9%93%BE%E8%B7%AF-10-%E5%A4%A7%E6%A0%B8%E5%BF%83%E9%98%B6%E6%AE%B5%E6%8A%80%E6%9C%AF%E8%A7%A3%E5%89%96%E8%A1%A8"><span class="toc-number">4.1.</span> <span class="toc-text">📌 链路 10 大核心阶段技术解剖表</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88-nslookup-%E4%BC%9A%E6%8A%A5%E9%94%99%EF%BC%9F"><span class="toc-number">5.</span> <span class="toc-text">三、为什么 nslookup 会报错？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81Fake-IP-%E6%98%AF%E5%A6%82%E4%BD%95%E5%BD%BB%E5%BA%95%E6%A0%B9%E6%B2%BB-DNS-%E6%B3%84%E9%9C%B2%E7%9A%84%EF%BC%9F"><span class="toc-number">6.</span> <span class="toc-text">四、Fake-IP 是如何彻底根治 DNS 泄露的？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E7%BB%88%E6%9E%81%E8%A7%A3%E6%83%91%EF%BC%9A%E7%9C%9F%E5%AE%9E-DNS-%E7%A9%B6%E7%AB%9F%E5%9C%A8%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E3%80%81%E7%94%B1%E8%B0%81%E5%8E%BB%E6%9F%A5%EF%BC%9F"><span class="toc-number">7.</span> <span class="toc-text">五、终极解惑：真实 DNS 究竟在什么时候、由谁去查？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%96%BC%EF%B8%8F-Clash-Verge-Rev-%E5%8E%9F%E7%94%9F%E7%95%8C%E9%9D%A2-GUI-%E4%B8%8E-%E5%BA%95%E5%B1%82-YAML-%E5%AE%9E%E6%97%B6%E7%AD%89%E9%AB%98%E8%81%94%E5%8A%A8%E5%AF%B9%E6%AF%94"><span class="toc-number">8.</span> <span class="toc-text">🖼️ Clash Verge Rev 原生界面 (GUI) 与 底层 YAML 实时等高联动对比</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%8124-%E9%A1%B9%E6%A0%B8%E5%BF%83%E5%8F%82%E6%95%B0%E6%B7%B1%E5%BA%A6%E5%AF%B9%E7%85%A7%E9%80%9F%E6%9F%A5%E8%A1%A8"><span class="toc-number">9.</span> <span class="toc-text">六、24 项核心参数深度对照速查表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E6%80%BB%E7%BB%93%E4%B8%8E%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-number">10.</span> <span class="toc-text">七、总结与最佳实践</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/10/16/clash-fake-ip-tun-guide/" title="深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/images/clash-fake-ip/cover.png" onerror="this.onerror=null;this.src='/img/404.webp'" alt="深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战"/></a><div class="content"><a class="title" href="/2026/10/16/clash-fake-ip-tun-guide/" title="深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战">深入剖析 Clash / Mihomo Fake-IP 与 TUN 模式：从 DNS 泄露根治到全链路数据流实战</a><time datetime="2026-10-16T09:30:00.000Z" title="發表於 2026-10-16 09:30:00">2026-10-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/14/iOS-Shadowrocket-WLOC-Location-Mock-Guide/" title="iOS 免越狱位置修改实战指南：基于 Shadowrocket 与 WLOC 模块"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/images/ios-wloc-location-mock-cover.jpg" onerror="this.onerror=null;this.src='/img/404.webp'" alt="iOS 免越狱位置修改实战指南：基于 Shadowrocket 与 WLOC 模块"/></a><div class="content"><a class="title" href="/2026/10/14/iOS-Shadowrocket-WLOC-Location-Mock-Guide/" title="iOS 免越狱位置修改实战指南：基于 Shadowrocket 与 WLOC 模块">iOS 免越狱位置修改实战指南：基于 Shadowrocket 与 WLOC 模块</a><time datetime="2026-10-14T16:16:00.000Z" title="發表於 2026-10-14 16:16:00">2026-10-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/07/%E4%B8%AD%E5%9B%BD%E5%AE%89%E5%8D%93%E5%8F%98%E5%BD%A2%E8%AE%B0%EF%BC%9A%E4%BB%8EMIUI%E5%88%B0%E9%B8%BF%E8%92%99%E7%9A%84%E5%8D%81%E4%BA%94%E5%B9%B4/" title="中国安卓变形记：从 MIUI 到鸿蒙的十五年"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/images/china-android/cover.png" onerror="this.onerror=null;this.src='/img/404.webp'" alt="中国安卓变形记：从 MIUI 到鸿蒙的十五年"/></a><div class="content"><a class="title" href="/2026/10/07/%E4%B8%AD%E5%9B%BD%E5%AE%89%E5%8D%93%E5%8F%98%E5%BD%A2%E8%AE%B0%EF%BC%9A%E4%BB%8EMIUI%E5%88%B0%E9%B8%BF%E8%92%99%E7%9A%84%E5%8D%81%E4%BA%94%E5%B9%B4/" title="中国安卓变形记：从 MIUI 到鸿蒙的十五年">中国安卓变形记：从 MIUI 到鸿蒙的十五年</a><time datetime="2026-10-07T10:38:00.000Z" title="發表於 2026-10-07 10:38:00">2026-10-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/01/OpenWrt%E5%85%BB%E8%80%81%E6%97%81%E8%B7%AF%E7%94%B1%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B(%E5%9F%BA%E4%BA%8EOpenClash%E4%B8%8EMihomo%E5%86%85%E6%A0%B8)/" title="OpenWrt养老旁路由从零开始(基于OpenClash与Mihomo内核)"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://api.btstu.cn/sjbz/?lx=dongman&amp;_r_=0061fc57-6d68-3ff6-61fd-45e7e5211875" onerror="this.onerror=null;this.src='/img/404.webp'" alt="OpenWrt养老旁路由从零开始(基于OpenClash与Mihomo内核)"/></a><div class="content"><a class="title" href="/2026/10/01/OpenWrt%E5%85%BB%E8%80%81%E6%97%81%E8%B7%AF%E7%94%B1%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B(%E5%9F%BA%E4%BA%8EOpenClash%E4%B8%8EMihomo%E5%86%85%E6%A0%B8)/" title="OpenWrt养老旁路由从零开始(基于OpenClash与Mihomo内核)">OpenWrt养老旁路由从零开始(基于OpenClash与Mihomo内核)</a><time datetime="2026-10-01T11:10:00.000Z" title="發表於 2026-10-01 11:10:00">2026-10-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/08/28/Linux-ops-box-%E7%B3%BB%E7%BB%9F%E8%BF%90%E7%BB%B4%E5%B7%A5%E5%85%B7%E7%AE%B1/" title="Linux-ops-box 终极系统运维工具箱：企业级 Linux 自动化运维指南"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://api.hanximeng.com/ranimg/api.php?_r_=c112b05e-090d-4e4c-15de-92e6ea7645bd" onerror="this.onerror=null;this.src='/img/404.webp'" alt="Linux-ops-box 终极系统运维工具箱：企业级 Linux 自动化运维指南"/></a><div class="content"><a class="title" href="/2026/08/28/Linux-ops-box-%E7%B3%BB%E7%BB%9F%E8%BF%90%E7%BB%B4%E5%B7%A5%E5%85%B7%E7%AE%B1/" title="Linux-ops-box 终极系统运维工具箱：企业级 Linux 自动化运维指南">Linux-ops-box 终极系统运维工具箱：企业级 Linux 自动化运维指南</a><time datetime="2026-08-28T15:30:00.000Z" title="發表於 2026-08-28 15:30:00">2026-08-28</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div id="workboard"><div id="runtimeTextTip"></div></div><p id="ghbdages"><a class="github-badge" target="_blank" href="https://hexo.io/" style="margin-inline:5px" data-title="博客框架为Hexo_v7.2.0" title="博客框架为Hexo_v7.2.0"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@2.1.5/img/badge/Frame-Hexo.svg" alt="博客框架为Hexo_v7.2.0"/></a><a class="github-badge" target="_blank" href="https://docs.anheyu.com/" style="margin-inline:5px" data-title="本站使用AnZhiYu主题" title="本站使用AnZhiYu主题"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.9/img/Theme-AnZhiYu-2E67D3.svg" alt="本站使用AnZhiYu主题"/></a><a class="github-badge" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" style="margin-inline:5px" data-title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可" title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@2.2.0/img/badge/Copyright-BY-NC-SA.svg" alt="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"/></a></p></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2026 By <a class="footer-bar-link" href="/" title="kikock" target="_blank">kikock</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a><a class="footer-bar-link" href="/privacy/" title="隐私政策">隐私政策</a><a class="footer-bar-link" href="/terms/" title="免责声明">免责声明</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">69</div></a><a href="/tags/" title="tag"><div class="headline">標籤</div><div class="length-num">194</div></a><a href="/categories/" title="category"><div class="headline">分類</div><div class="length-num">38</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="顯示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>顯示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.webp&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/AI/" style="font-size: 0.88rem;">AI<sup>7</sup></a><a href="/tags/AI-Agent/" style="font-size: 0.88rem;">AI Agent<sup>3</sup></a><a href="/tags/AI%E5%8A%A9%E6%89%8B/" style="font-size: 0.88rem;">AI助手<sup>1</sup></a><a href="/tags/Antigravity/" style="font-size: 0.88rem;">Antigravity<sup>3</sup></a><a href="/tags/Claude/" style="font-size: 0.88rem;">Claude<sup>2</sup></a><a href="/tags/Clawdbot/" style="font-size: 0.88rem;">Clawdbot<sup>3</sup></a><a href="/tags/Cloudflare/" style="font-size: 0.88rem;">Cloudflare<sup>3</sup></a><a href="/tags/Content-Creation/" style="font-size: 0.88rem;">Content Creation<sup>1</sup></a><a href="/tags/DevOps/" style="font-size: 0.88rem;">DevOps<sup>1</sup></a><a href="/tags/docker/" style="font-size: 0.88rem;">docker<sup>4</sup></a><a href="/tags/Docker/" style="font-size: 0.88rem;">Docker<sup>2</sup></a><a href="/tags/Full-Stack/" style="font-size: 0.88rem;">Full Stack<sup>1</sup></a><a href="/tags/git/" style="font-size: 0.88rem;">git<sup>1</sup></a><a href="/tags/GitHub/" style="font-size: 0.88rem;">GitHub<sup>1</sup></a><a href="/tags/Hermes-Agent/" style="font-size: 0.88rem;">Hermes Agent<sup>1</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>2</sup></a><a href="/tags/Kubernetes/" style="font-size: 0.88rem;">Kubernetes<sup>1</sup></a><a href="/tags/Kuboard/" style="font-size: 0.88rem;">Kuboard<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>11</sup></a><a href="/tags/mihomo/" style="font-size: 0.88rem;">mihomo<sup>2</sup></a><a href="/tags/nginx/" style="font-size: 0.88rem;">nginx<sup>1</sup></a><a href="/tags/openclash/" style="font-size: 0.88rem;">openclash<sup>1</sup></a><a href="/tags/OpenClaw/" style="font-size: 0.88rem;">OpenClaw<sup>4</sup></a><a href="/tags/openwrt/" style="font-size: 0.88rem;">openwrt<sup>2</sup></a><a href="/tags/Rancher/" style="font-size: 0.88rem;">Rancher<sup>1</sup></a><a href="/tags/Shell/" style="font-size: 0.88rem;">Shell<sup>1</sup></a><a href="/tags/Telegram-Bot/" style="font-size: 0.88rem;">Telegram Bot<sup>3</sup></a><a href="/tags/VNC/" style="font-size: 0.88rem;">VNC<sup>1</sup></a><a href="/tags/Windows%E5%AE%89%E8%A3%85/" style="font-size: 0.88rem;">Windows安装<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 0.88rem;">云原生<sup>1</sup></a><a href="/tags/%E5%A4%A7%E9%BE%99%E8%99%BE%E7%83%AD/" style="font-size: 0.88rem;">大龙虾热<sup>1</sup></a><a href="/tags/%E5%B9%B3%E5%8F%B0%E6%95%B4%E5%90%88/" style="font-size: 0.88rem;">平台整合<sup>1</sup></a><a href="/tags/%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/" style="font-size: 0.88rem;">年终总结<sup>1</sup></a><a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" style="font-size: 0.88rem;">微服务<sup>1</sup></a><a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" style="font-size: 0.88rem;">数据库<sup>1</sup></a><a href="/tags/%E6%97%81%E8%B7%AF%E7%94%B1/" style="font-size: 0.88rem;">旁路由<sup>1</sup></a><a href="/tags/%E7%A7%91%E6%8A%80%E5%8E%86%E5%8F%B2/" style="font-size: 0.88rem;">科技历史<sup>2</sup></a><a href="/tags/%E8%87%AA%E5%8A%A8%E5%8C%96/" style="font-size: 0.88rem;">自动化<sup>1</sup></a><a href="/tags/%E8%BF%90%E7%BB%B4/" style="font-size: 0.88rem;">运维<sup>1</sup></a><a href="/tags/%E9%83%A8%E7%BD%B2%E6%95%99%E7%A8%8B/" style="font-size: 0.88rem;">部署教程<sup>3</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="閱讀模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="簡繁轉換">繁</button><button id="darkmode" type="button" title="淺色和深色模式轉換"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="單欄和雙欄切換"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="設定"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目錄"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><button id="go-up" type="button" title="回到頂部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script async src="/anzhiyu/random.js"></script><script async="async">(function () {
+  var grt = new Date("05/01/2024 00:00:00"); //设置网站上线时间
+  var now = new Date();
+  var dnum;
+  var hnum;
+  var mnum;
+  var snum;
+  var nowHour;
+
+  // 计算并更新天数、小时数、分钟数和秒数
+  function updateTime() {
+    now = new Date(); // 更新 now 的值
+    nowHour = now.getHours(); // 更新 nowHour 的值
+    var days = (now - grt) / 1000 / 60 / 60 / 24;
+    dnum = Math.floor(days);
+    var hours = (now - grt) / 1000 / 60 / 60 - 24 * dnum;
+    hnum = Math.floor(hours);
+    if (String(hnum).length == 1) {
+      hnum = "0" + hnum;
+    }
+    var minutes = (now - grt) / 1000 / 60 - 24 * 60 * dnum - 60 * hnum;
+    mnum = Math.floor(minutes);
+    if (String(mnum).length == 1) {
+      mnum = "0" + mnum;
+    }
+    var seconds = (now - grt) / 1000 - 24 * 60 * 60 * dnum - 60 * 60 * hnum - 60 * mnum;
+    snum = Math.round(seconds);
+    if (String(snum).length == 1) {
+      snum = "0" + snum;
+    }
+  }
+
+  // 更新网页中显示的网站运行时间
+  function updateHtml() {
+    const footer = document.getElementById("footer");
+    if (!footer) return
+    let currentTimeHtml = "";
+    if (nowHour < 18 && nowHour >= 9) {
+      // 如果是上班时间，默认就是"安知鱼-上班摸鱼中.svg"图片，不需要更改
+      currentTimeHtml = `本站居然运行了 ${dnum} 天<span id='runtime'> ${hnum} 小时 ${mnum} 分 ${snum} 秒 </span><i class='anzhiyufont anzhiyu-icon-heartbeat' style='color:red'></i>`;
+    } else {
+      // 如果是下班时间，插入"安知鱼-下班啦.svg"图片
+      let img = document.querySelector("#workboard .workSituationImg");
+      if (img != null) {
+        img.src = "";
+        img.title = "";
+        img.alt = "";
+      }
+
+      currentTimeHtml = `本站居然运行了 ${dnum} 天<span id='runtime'> ${hnum} 小时 ${mnum} 分 ${snum} 秒 </span><i class='anzhiyufont anzhiyu-icon-heartbeat' style='color:red'></i>`;
+    }
+
+    if (document.getElementById("runtimeTextTip")) {
+      document.getElementById("runtimeTextTip").innerHTML = currentTimeHtml;
+    }
+  }
+
+  setInterval(() => {
+    updateTime();
+    updateHtml();
+  }, 1000);
+})();</script><div class="js-pjax"><input type="hidden" name="page-type" id="page-type" value="post"></div><script async data-pjax src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.1/bubble/bubble.js"></script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="/assets/js/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
